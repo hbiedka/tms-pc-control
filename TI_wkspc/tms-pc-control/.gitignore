@@ -1,1 +1,7 @@
 /Debug/
+/.settings
+/.launches
+/targetConfigs
+/.ccsproject
+/.cproject
+/.project
