@@ -1,5 +1,5 @@
-/.metadata/
-/.tempfiles/
-/.jxbrowser-data/
-/.dvt/
-/RemoteSystemsTempFiles/
+.metadata
+.tempfiles
+.jxbrowser-data
+.dvt
+RemoteSystemsTempFiles
