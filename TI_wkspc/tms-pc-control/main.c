@@ -28,27 +28,29 @@ void initMCU(void){
 void setupUART(){
     EALLOW;
 
-    SysCtrlRegs.PCLKCR0.bit.SCIBENCLK = 1;
-    SciaRegs.SCIFFTX.bit.SCIRST=0; //enable SCI TX reset mode
-    SciaRegs.SCICTL1.bit.SWRESET=0; //enable SCI reset mode
-
     //RX GPIO Conf
-    GpioCtrlRegs.GPAMUX2.bit.GPIO28=01;
-    GpioCtrlRegs.GPAPUD.bit.GPIO28=0;
-    GpioCtrlRegs.GPADIR.bit.GPIO28=0;
+    GpioCtrlRegs.GPAMUX2.bit.GPIO28=1;
+    GpioCtrlRegs.GPAPUD.bit.GPIO28=1;
+    GpioCtrlRegs.GPADIR.bit.GPIO28=1;
 
     //TX GPIO Conf
-    GpioCtrlRegs.GPAMUX2.bit.GPIO29=01;
-    GpioCtrlRegs.GPAPUD.bit.GPIO29=1;
-    GpioCtrlRegs.GPADIR.bit.GPIO29=1;
+    GpioCtrlRegs.GPAMUX2.bit.GPIO29=1;
+    GpioCtrlRegs.GPAPUD.bit.GPIO29=0;
+    GpioCtrlRegs.GPADIR.bit.GPIO29=0;
 
-    SysCtrlRegs.LOSPCP.bit.LSPCLK=2; //sysclk/4
-    SciaRegs.SCIHBAUD=1; //487 -> 9600 bps
-    SciaRegs.SCILBAUD=231;
+    SysCtrlRegs.PCLKCR0.bit.SCIBENCLK = 1;
 
-    SciaRegs.SCICCR.bit.STOPBITS=1;
-    SciaRegs.SCICCR.bit.PARITY=1;
-    SciaRegs.SCICCR.bit.PARITYENA=0; //aktualnie jest 8n1, mo¿na zmieniæ na 8e1
+    SciaRegs.SCIFFTX.bit.SCIRST=0;
+    SciaRegs.SCICTL1.bit.SWRESET=0; //enable SCI reset mode
+    SciaRegs.SCIFFRX.bit.RXFIFORESET=0;
+
+    SysCtrlRegs.LOSPCP.bit.LSPCLK=0; //sysclk/1
+    SciaRegs.SCIHBAUD=0x01;
+    SciaRegs.SCILBAUD=0x45;
+
+    SciaRegs.SCICCR.bit.STOPBITS=0;
+    SciaRegs.SCICCR.bit.PARITY=0;
+    SciaRegs.SCICCR.bit.PARITYENA=1; //aktualnie jest 8n1, mo¿na zmieniæ na 8o1
     SciaRegs.SCICCR.bit.LOOPBKENA=0;
     SciaRegs.SCICCR.bit.ADDRIDLE_MODE=0;
     SciaRegs.SCICCR.bit.SCICHAR=7;
@@ -75,7 +77,7 @@ void setupInterrupts(){
     PieCtrlRegs.PIECTRL.bit.ENPIE=1;
     PieCtrlRegs.PIEIER9.bit.INTx1=1;
     PieVectTable.SCIRXINTA=&SCI_RX;
-    IER|=M_INT9;
+    IER|=M_INT1;
     EINT;
     ERTM;
     EDIS;
@@ -88,7 +90,7 @@ void main(void)
     setupInterrupts();
 
     while(1){
-        DELAY_US(500000);
+        DELAY_US(100000);
         GpioDataRegs.GPATOGGLE.bit.GPIO9=1;
         SciaRegs.SCITXBUF=100;
         __asm(" NOP");
@@ -97,6 +99,6 @@ void main(void)
 
 __interrupt void SCI_RX(){
     RX_counter++;
-    PieCtrlRegs.PIEACK.bit.ACK9=1;
+    PieCtrlRegs.PIEACK.bit.ACK1=1;
     RX_char=SciaRegs.SCIRXBUF.bit.RXDT; //read received character
 }
