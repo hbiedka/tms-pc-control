@@ -5,7 +5,7 @@
  *      Author: Bogdan
  */
 
-struct {
+struct TMS_state {
     short pb_gpio[2];
     short enc_gpio;
 
@@ -17,9 +17,9 @@ struct {
     float pwm_duty[6];
 
     float tim_freq[2];
-}TMS_state;
+};
 
-void updateState(TMS_state state){
+void updateState(struct TMS_state state){
 
 }
 
@@ -27,9 +27,9 @@ void setLED(short index,short state){
     //TODO
 }
 
-void setPWMduty(short index, float dc){
-
-}
+//void setPWMduty(short index, float dc){
+//
+//}
 
 void setPWMduty(short index, float freq){
 
