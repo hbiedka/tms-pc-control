@@ -9,9 +9,20 @@
 #define LEN(arr) ((int) (sizeof (arr) / sizeof (arr)[0]))
 #define uC_clockPeriod 1/150.0e6f                 //TMS320F28335 clock period in seconds
 
+__interrupt void SCI_RX();
+
+unsigned long int RX_counter=0;
+unsigned char RX_char;
+
 void initMCU(void){
     InitSysCtrl();
 
+    //status LED conf.
+    EALLOW;
+    GpioCtrlRegs.GPAMUX1.bit.GPIO9=0;
+    GpioCtrlRegs.GPAPUD.bit.GPIO9=1;
+    GpioCtrlRegs.GPADIR.bit.GPIO9=1;
+    EDIS;
 }
 
 void setupUART(){
@@ -45,25 +56,47 @@ void setupUART(){
     SciaRegs.SCIFFTX.bit.SCIRST=1; //disable SCI TX reset mode
     SciaRegs.SCICTL1.bit.TXENA=1;  //enable tx
 
-//    SciaRegs.SCICTL1.bit.RXENA=1;
-//    SciaRegs.SCIFFRX.bit.RXFIFORESET=1;
-//    SciaRegs.SCIRXST.bit.RXRDY=1;
-//    SciaRegs.SCICTL2.bit.RXBKINTENA=0;
+    SciaRegs.SCICTL1.bit.RXENA=1;
+    SciaRegs.SCIFFRX.bit.RXFIFORESET=1;
+    SciaRegs.SCIRXST.bit.RXRDY=1;
+    SciaRegs.SCICTL2.bit.RXBKINTENA=1;
 
     SciaRegs.SCICTL1.bit.SWRESET=1; //disable SCI reset mode
     EDIS;
 }
 
-
+void setupInterrupts(){
+    DINT;
+    InitPieCtrl();
+    InitPieVectTable();
+    EALLOW;
+    IER=0;
+    IFR=0;
+    PieCtrlRegs.PIECTRL.bit.ENPIE=1;
+    PieCtrlRegs.PIEIER9.bit.INTx1=1;
+    PieVectTable.SCIRXINTA=&SCI_RX;
+    IER|=M_INT9;
+    EINT;
+    ERTM;
+    EDIS;
+}
 
 void main(void)
 {
     initMCU();
     setupUART();
+    setupInterrupts();
 
     while(1){
         DELAY_US(500000);
-        SciaRegs.SCITXBUF='A';
+        GpioDataRegs.GPATOGGLE.bit.GPIO9=1;
+        SciaRegs.SCITXBUF=100;
         __asm(" NOP");
     }
+}
+
+__interrupt void SCI_RX(){
+    RX_counter++;
+    PieCtrlRegs.PIEACK.bit.ACK9=1;
+    RX_char=SciaRegs.SCIRXBUF.bit.RXDT; //read received character
 }
