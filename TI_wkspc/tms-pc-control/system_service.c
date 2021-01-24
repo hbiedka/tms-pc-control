@@ -15,16 +15,52 @@ __interrupt void SCI_RX(){
 }
 
 __interrupt void TIMER0INT(){
-    TIMER_counter[0]++;
+    if (TIMER_multiplierTmp[0]==0){
+        CpuTimer0Regs.PRD.all = TIMER_PRD[0]-TIMER_INTERRUPTDELAY;
+        CpuTimer0Regs.TCR.bit.TRB = 1;
+        TIMER_multiplierTmp[0] = TIMER_multiplier[0];
+        /* CODE GOES HERE */
+        ++TIMER_counter[0];
+
+        }
+        else{
+            CpuTimer0Regs.PRD.all = TIMER_THRESHOLD-TIMER_INTERRUPTDELAY;
+            CpuTimer0Regs.TCR.bit.TRB = 1;
+            --TIMER_multiplierTmp[0];
+        }
 
     PieCtrlRegs.PIEACK.bit.ACK1 = 1; //PIE acknowledgement
 }
 __interrupt void TIMER1INT(){
-    TIMER_counter[1]++;
+    if (TIMER_multiplierTmp[1]==0){
+            CpuTimer1Regs.PRD.all = TIMER_PRD[1]-TIMER_INTERRUPTDELAY;
+            CpuTimer1Regs.TCR.bit.TRB = 1;
+            TIMER_multiplierTmp[1] = TIMER_multiplier[1];
+            /* CODE GOES HERE */
+            ++TIMER_counter[1];
+
+            }
+            else{
+                CpuTimer1Regs.PRD.all = TIMER_THRESHOLD-TIMER_INTERRUPTDELAY;
+                CpuTimer1Regs.TCR.bit.TRB = 1;
+                --TIMER_multiplierTmp[1];
+            }
     //no PIE acknowledgement
 }
 __interrupt void TIMER2INT(){
-    TIMER_counter[2]++;
+    if (TIMER_multiplierTmp[2]==0){
+            CpuTimer2Regs.PRD.all = TIMER_PRD[2]-TIMER_INTERRUPTDELAY;
+            CpuTimer2Regs.TCR.bit.TRB = 1;
+            TIMER_multiplierTmp[2] = TIMER_multiplier[2];
+            /* CODE GOES HERE */
+            ++TIMER_counter[2];
+
+            }
+            else{
+                CpuTimer2Regs.PRD.all = TIMER_THRESHOLD-TIMER_INTERRUPTDELAY;
+                CpuTimer2Regs.TCR.bit.TRB = 1;
+                --TIMER_multiplierTmp[2];
+            }
     //no PIE acknowledgement
 }
 

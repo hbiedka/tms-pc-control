@@ -9,14 +9,16 @@
 #include "master_header.h"
 
 unsigned long definePRD(float T){
-    unsigned long TinTimer = (unsigned long)(T*TMS_CLOCKFREQUENCY);
-    unsigned long tmp = TinTimer % TIMER_THRESHOLD;
+    unsigned long long TinTimer = (unsigned long long)(T*TMS_CLOCKFREQUENCY);
+    unsigned long tmp = (unsigned long)(TinTimer % TIMER_THRESHOLD);
     if (tmp==0) tmp=TIMER_THRESHOLD;
     return tmp;
 }
 
 unsigned int defineQuotient(float T){
-    unsigned long TinTimer = (unsigned long)(T*TMS_CLOCKFREQUENCY);
-    return (unsigned int)(TinTimer*TIMER_INVTHRESHOLD);
+    if (T<1.0)
+        return (unsigned int)(T*TMS_CLOCKFREQUENCY*TIMER_INVTHRESHOLD);
+    else
+        return (unsigned int)(T*TIMER_INVTHRESHOLD*TMS_CLOCKFREQUENCY);
 }
 

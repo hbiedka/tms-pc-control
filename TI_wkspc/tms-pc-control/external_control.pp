@@ -41,8 +41,9 @@ typedef struct TMS_state TMS_state;
 extern TMS_state state;
  
 extern unsigned long int TIMER_counter[3];
-extern unsigned int Timer_MultiplierTmp[3];
-extern unsigned int Timer_Multiplier[3];
+extern unsigned int TIMER_multiplierTmp[3];
+extern unsigned int TIMER_multiplier[3];
+extern unsigned long TIMER_PRD[3];
  
 extern unsigned long int RX_counter;
 extern unsigned char RX_char;
@@ -66,8 +67,9 @@ extern unsigned char RX_char;
 extern TMS_state state;
  
 extern unsigned long int TIMER_counter[3];
-extern unsigned int Timer_MultiplierTmp[3];
-extern unsigned int Timer_Multiplier[3];
+extern unsigned int TIMER_multiplierTmp[3];
+extern unsigned int TIMER_multiplier[3];
+extern unsigned long TIMER_PRD[3];
  
 extern unsigned long int RX_counter;
 extern unsigned char RX_char;
@@ -9253,6 +9255,33 @@ void setPWMduty(short index, float freq){
 }
 
 void setTimerFreq(short index, float freq){
-
+    float T = 1.0/freq;
+    if (index == 0){
+        TIMER_PRD[0] = definePRD(T);
+        if (TIMER_PRD[0] < 150000)
+            TIMER_PRD[0] = 150000;
+        CpuTimer0Regs.PRD.all = TIMER_PRD[0];
+        TIMER_multiplier[0] = defineQuotient(T);
+        TIMER_multiplierTmp[0] = TIMER_multiplier[0];
+        CpuTimer0Regs.TCR.bit.TRB = 1;
+    }
+    else if (index == 1){
+        TIMER_PRD[1] = definePRD(T);
+        if (TIMER_PRD[1] < 150000)
+            TIMER_PRD[1] = 150000;
+        CpuTimer1Regs.PRD.all = TIMER_PRD[1];
+        TIMER_multiplier[1] = defineQuotient(T);
+        TIMER_multiplierTmp[1] = TIMER_multiplier[1];
+        CpuTimer1Regs.TCR.bit.TRB = 1;
+    }
+    else if (index==2){
+        TIMER_PRD[2] = definePRD(T);
+        if (TIMER_PRD[2] < 150000)
+            TIMER_PRD[2] = 150000;
+        CpuTimer2Regs.PRD.all = TIMER_PRD[2];
+        TIMER_multiplier[2] = defineQuotient(T);
+        TIMER_multiplierTmp[2] = TIMER_multiplier[2];
+        CpuTimer2Regs.TCR.bit.TRB = 1;
+    }
 }
 

@@ -41,8 +41,9 @@ typedef struct TMS_state TMS_state;
 extern TMS_state state;
  
 extern unsigned long int TIMER_counter[3];
-extern unsigned int Timer_MultiplierTmp[3];
-extern unsigned int Timer_Multiplier[3];
+extern unsigned int TIMER_multiplierTmp[3];
+extern unsigned int TIMER_multiplier[3];
+extern unsigned long TIMER_PRD[3];
  
 extern unsigned long int RX_counter;
 extern unsigned char RX_char;
@@ -66,8 +67,9 @@ extern unsigned char RX_char;
 extern TMS_state state;
  
 extern unsigned long int TIMER_counter[3];
-extern unsigned int Timer_MultiplierTmp[3];
-extern unsigned int Timer_Multiplier[3];
+extern unsigned int TIMER_multiplierTmp[3];
+extern unsigned int TIMER_multiplier[3];
+extern unsigned long TIMER_PRD[3];
  
 extern unsigned long int RX_counter;
 extern unsigned char RX_char;
@@ -9243,8 +9245,9 @@ void setTimerFreq(short index, float freq);
      
     TMS_state state;                               
     unsigned long int TIMER_counter[3] = {0,0,0};  
-    unsigned int Timer_Multiplier[3] = {0,0,0};    
-    unsigned int Timer_MultiplierTmp[3] = {0,0,0}; 
+    unsigned int TIMER_multiplier[3] = {0,0,0};    
+    unsigned int TIMER_multiplierTmp[3] = {0,0,0}; 
+    unsigned long TIMER_PRD[3] = {150000000,150000000,150000000};          
     unsigned long int RX_counter = 0;              
     unsigned char RX_char;                         
 

@@ -11,8 +11,9 @@
     /* GLOBAL VARIABLES */
     TMS_state state;                               //peripherals state structure
     unsigned long int TIMER_counter[3] = {0,0,0};  //timers counter
-    unsigned int Timer_Multiplier[3] = {0,0,0};    //timers software multipliers
-    unsigned int Timer_MultiplierTmp[3] = {0,0,0}; //timers temporary counter multipliers
+    unsigned int TIMER_multiplier[3] = {0,0,0};    //timers software multipliers
+    unsigned int TIMER_multiplierTmp[3] = {0,0,0}; //timers temporary counter multipliers
+    unsigned long TIMER_PRD[3] = {150000000,150000000,150000000};          //timers counter non-full PRDs
     unsigned long int RX_counter = 0;              //UART counter
     unsigned char RX_char;                         //UART RX
 

@@ -9,9 +9,9 @@ void main(void)
     initMCU();
 
     while(1){
-        DELAY_US(100000);
-        GpioDataRegs.GPATOGGLE.bit.GPIO9=1;
-        SciaRegs.SCITXBUF=100;
+        //DELAY_US(100000);
+        //GpioDataRegs.GPATOGGLE.bit.GPIO9=1;
+        //SciaRegs.SCITXBUF=100;
         __asm(" NOP");
     }
 }

@@ -41,8 +41,9 @@ typedef struct TMS_state TMS_state;
 extern TMS_state state;
  
 extern unsigned long int TIMER_counter[3];
-extern unsigned int Timer_MultiplierTmp[3];
-extern unsigned int Timer_Multiplier[3];
+extern unsigned int TIMER_multiplierTmp[3];
+extern unsigned int TIMER_multiplier[3];
+extern unsigned long TIMER_PRD[3];
  
 extern unsigned long int RX_counter;
 extern unsigned char RX_char;
@@ -66,8 +67,9 @@ extern unsigned char RX_char;
 extern TMS_state state;
  
 extern unsigned long int TIMER_counter[3];
-extern unsigned int Timer_MultiplierTmp[3];
-extern unsigned int Timer_Multiplier[3];
+extern unsigned int TIMER_multiplierTmp[3];
+extern unsigned int TIMER_multiplier[3];
+extern unsigned long TIMER_PRD[3];
  
 extern unsigned long int RX_counter;
 extern unsigned char RX_char;
@@ -9241,14 +9243,16 @@ void setTimerFreq(short index, float freq);
 
 
 unsigned long definePRD(float T){
-    unsigned long TinTimer = (unsigned long)(T*150E+6f);
-    unsigned long tmp = TinTimer % 4294967295U;
+    unsigned long long TinTimer = (unsigned long long)(T*150E+6f);
+    unsigned long tmp = (unsigned long)(TinTimer % 4294967295U);
     if (tmp==0) tmp=4294967295U;
     return tmp;
 }
 
 unsigned int defineQuotient(float T){
-    unsigned long TinTimer = (unsigned long)(T*150E+6f);
-    return (unsigned int)(TinTimer*2.3283064e-10L);
+    if (T<1.0)
+        return (unsigned int)(T*150E+6f*2.3283064e-10L);
+    else
+        return (unsigned int)(T*2.3283064e-10L*150E+6f);
 }
 

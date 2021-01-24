@@ -41,8 +41,9 @@ typedef struct TMS_state TMS_state;
 extern TMS_state state;
  
 extern unsigned long int TIMER_counter[3];
-extern unsigned int Timer_MultiplierTmp[3];
-extern unsigned int Timer_Multiplier[3];
+extern unsigned int TIMER_multiplierTmp[3];
+extern unsigned int TIMER_multiplier[3];
+extern unsigned long TIMER_PRD[3];
  
 extern unsigned long int RX_counter;
 extern unsigned char RX_char;
@@ -66,8 +67,9 @@ extern unsigned char RX_char;
 extern TMS_state state;
  
 extern unsigned long int TIMER_counter[3];
-extern unsigned int Timer_MultiplierTmp[3];
-extern unsigned int Timer_Multiplier[3];
+extern unsigned int TIMER_multiplierTmp[3];
+extern unsigned int TIMER_multiplier[3];
+extern unsigned long TIMER_PRD[3];
  
 extern unsigned long int RX_counter;
 extern unsigned char RX_char;
@@ -9247,16 +9249,52 @@ __interrupt void SCI_RX(){
 }
 
 __interrupt void TIMER0INT(){
-    TIMER_counter[0]++;
+    if (TIMER_multiplierTmp[0]==0){
+        CpuTimer0Regs.PRD.all = TIMER_PRD[0]-26;
+        CpuTimer0Regs.TCR.bit.TRB = 1;
+        TIMER_multiplierTmp[0] = TIMER_multiplier[0];
+         
+        ++TIMER_counter[0];
+
+        }
+        else{
+            CpuTimer0Regs.PRD.all = 4294967295U-26;
+            CpuTimer0Regs.TCR.bit.TRB = 1;
+            --TIMER_multiplierTmp[0];
+        }
 
     PieCtrlRegs.PIEACK.bit.ACK1 = 1; 
 }
 __interrupt void TIMER1INT(){
-    TIMER_counter[1]++;
+    if (TIMER_multiplierTmp[1]==0){
+            CpuTimer1Regs.PRD.all = TIMER_PRD[1]-26;
+            CpuTimer1Regs.TCR.bit.TRB = 1;
+            TIMER_multiplierTmp[1] = TIMER_multiplier[1];
+             
+            ++TIMER_counter[1];
+
+            }
+            else{
+                CpuTimer1Regs.PRD.all = 4294967295U-26;
+                CpuTimer1Regs.TCR.bit.TRB = 1;
+                --TIMER_multiplierTmp[1];
+            }
     
 }
 __interrupt void TIMER2INT(){
-    TIMER_counter[2]++;
+    if (TIMER_multiplierTmp[2]==0){
+            CpuTimer2Regs.PRD.all = TIMER_PRD[2]-26;
+            CpuTimer2Regs.TCR.bit.TRB = 1;
+            TIMER_multiplierTmp[2] = TIMER_multiplier[2];
+             
+            ++TIMER_counter[2];
+
+            }
+            else{
+                CpuTimer2Regs.PRD.all = 4294967295U-26;
+                CpuTimer2Regs.TCR.bit.TRB = 1;
+                --TIMER_multiplierTmp[2];
+            }
     
 }
 

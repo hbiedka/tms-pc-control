@@ -15,7 +15,7 @@
     #include "stdlib.h"
     #include "string.h"
     #include "system_utils.h"
-    #include "tms_setup.h"
+    #include "system_setup.h"
     #include "system_service.h"
     #include "external_control.h"
 
@@ -25,5 +25,6 @@
     #define TIMER_THRESHOLD 4294967295U                       //timer capacity
     #define TIMER_INVTHRESHOLD 2.3283064e-10L                 //inverse of timer capacity
     #define TIMER_MINPRD 150000                               //1 kHz max
+    #define TIMER_INTERRUPTDELAY 26                                 //delay between start of interrupt and TIM update
 
 #endif /* MASTER_HEADER_H_ */

@@ -34,8 +34,9 @@ typedef struct TMS_state TMS_state;
 extern TMS_state state;
  
 extern unsigned long int TIMER_counter[3];
-extern unsigned int Timer_MultiplierTmp[3];
-extern unsigned int Timer_Multiplier[3];
+extern unsigned int TIMER_multiplierTmp[3];
+extern unsigned int TIMER_multiplier[3];
+extern unsigned long TIMER_PRD[3];
  
 extern unsigned long int RX_counter;
 extern unsigned char RX_char;
@@ -59,8 +60,9 @@ extern unsigned char RX_char;
 extern TMS_state state;
  
 extern unsigned long int TIMER_counter[3];
-extern unsigned int Timer_MultiplierTmp[3];
-extern unsigned int Timer_Multiplier[3];
+extern unsigned int TIMER_multiplierTmp[3];
+extern unsigned int TIMER_multiplier[3];
+extern unsigned long TIMER_PRD[3];
  
 extern unsigned long int RX_counter;
 extern unsigned char RX_char;
@@ -9351,9 +9353,9 @@ void main(void)
     initMCU();
 
     while(1){
-        DSP28x_usDelay(((((long double) 100000 * 1000.0L) / (long double)6.667L) - 9.0L) / 5.0L);
-        GpioDataRegs.GPATOGGLE.bit.GPIO9=1;
-        SciaRegs.SCITXBUF=100;
+        
+        
+        
         __asm(" NOP");
     }
 }
