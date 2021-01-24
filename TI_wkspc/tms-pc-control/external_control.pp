@@ -9225,6 +9225,9 @@ __interrupt void SCI_RX();
 __interrupt void TIMER0INT();
 __interrupt void TIMER1INT();
 __interrupt void TIMER2INT();
+__interrupt void BUTTON1INT();
+__interrupt void BUTTON2INT();
+short readEncoder();
 
 
 
@@ -9239,7 +9242,8 @@ void setLED(short index,short state);
 void setPWMduty(short index, float freq);
 void setTimerFreq(short index, float freq);
 
-
+     
+     
 
 
 void updateState(struct TMS_state state){

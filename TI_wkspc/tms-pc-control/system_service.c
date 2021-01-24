@@ -10,8 +10,18 @@
 
 __interrupt void SCI_RX(){
     RX_counter++;
-    PieCtrlRegs.PIEACK.bit.ACK1=1;
+    PieCtrlRegs.PIEACK.all = (PIEACK_GROUP8 & PIEACK_GROUP9);
     RX_char=SciaRegs.SCIRXBUF.bit.RXDT; //read received character
+}
+
+__interrupt void BUTTON1INT(){
+    state.pb_gpio[0] = PB1_STATE;
+    PieCtrlRegs.PIEACK.all = PIEACK_GROUP1;
+}
+
+__interrupt void BUTTON2INT(){
+    state.pb_gpio[1] = PB2_STATE;
+    PieCtrlRegs.PIEACK.all = PIEACK_GROUP12;
 }
 
 __interrupt void TIMER0INT(){
@@ -62,5 +72,9 @@ __interrupt void TIMER2INT(){
                 --TIMER_multiplierTmp[2];
             }
     //no PIE acknowledgement
+}
+
+short readEncoder(){
+    return 0;
 }
 

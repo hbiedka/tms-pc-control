@@ -9225,6 +9225,9 @@ __interrupt void SCI_RX();
 __interrupt void TIMER0INT();
 __interrupt void TIMER1INT();
 __interrupt void TIMER2INT();
+__interrupt void BUTTON1INT();
+__interrupt void BUTTON2INT();
+short readEncoder();
 
 
 
@@ -9239,13 +9242,24 @@ void setLED(short index,short state);
 void setPWMduty(short index, float freq);
 void setTimerFreq(short index, float freq);
 
-
+     
+     
 
 
 __interrupt void SCI_RX(){
     RX_counter++;
-    PieCtrlRegs.PIEACK.bit.ACK1=1;
+    PieCtrlRegs.PIEACK.all = (0x0080 & 0x0100);
     RX_char=SciaRegs.SCIRXBUF.bit.RXDT; 
+}
+
+__interrupt void BUTTON1INT(){
+    state.pb_gpio[0] = !GpioDataRegs . GPADAT . bit . GPIO17;
+    PieCtrlRegs.PIEACK.all = 0x0001;
+}
+
+__interrupt void BUTTON2INT(){
+    state.pb_gpio[1] = !GpioDataRegs . GPBDAT . bit . GPIO48;
+    PieCtrlRegs.PIEACK.all = 0x0800;
 }
 
 __interrupt void TIMER0INT(){
@@ -9296,5 +9310,9 @@ __interrupt void TIMER2INT(){
                 --TIMER_multiplierTmp[2];
             }
     
+}
+
+short readEncoder(){
+    return 0;
 }
 

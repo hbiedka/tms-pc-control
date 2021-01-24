@@ -9218,6 +9218,9 @@ __interrupt void SCI_RX();
 __interrupt void TIMER0INT();
 __interrupt void TIMER1INT();
 __interrupt void TIMER2INT();
+__interrupt void BUTTON1INT();
+__interrupt void BUTTON2INT();
+short readEncoder();
 
 
 
@@ -9232,7 +9235,8 @@ void setLED(short index,short state);
 void setPWMduty(short index, float freq);
 void setTimerFreq(short index, float freq);
 
-
+     
+     
 
 
  
@@ -9353,9 +9357,8 @@ void main(void)
     initMCU();
 
     while(1){
-        
-        
-        
+        DSP28x_usDelay(((((long double) 100000 * 1000.0L) / (long double)6.667L) - 9.0L) / 5.0L);
+        SciaRegs.SCITXBUF=100;
         __asm(" NOP");
     }
 }

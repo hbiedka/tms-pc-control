@@ -12,5 +12,8 @@ __interrupt void SCI_RX();
 __interrupt void TIMER0INT();
 __interrupt void TIMER1INT();
 __interrupt void TIMER2INT();
+__interrupt void BUTTON1INT();
+__interrupt void BUTTON2INT();
+short readEncoder();
 
 #endif /* SYSTEM_SERVICE_H_ */
