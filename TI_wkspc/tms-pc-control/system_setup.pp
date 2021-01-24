@@ -9288,15 +9288,15 @@ void setupUART(){
 
     
     GpioCtrlRegs.GPAMUX2.bit.GPIO28=1;
-    GpioCtrlRegs.GPAPUD.bit.GPIO28=1;
-    GpioCtrlRegs.GPADIR.bit.GPIO28=1;
+    GpioCtrlRegs.GPAPUD.bit.GPIO28=0;
+    GpioCtrlRegs.GPADIR.bit.GPIO28=0;
 
     
     GpioCtrlRegs.GPAMUX2.bit.GPIO29=1;
-    GpioCtrlRegs.GPAPUD.bit.GPIO29=0;
-    GpioCtrlRegs.GPADIR.bit.GPIO29=0;
+    GpioCtrlRegs.GPAPUD.bit.GPIO29=1;
+    GpioCtrlRegs.GPADIR.bit.GPIO29=1;
 
-    SysCtrlRegs.PCLKCR0.bit.SCICENCLK = 1;
+    SysCtrlRegs.PCLKCR0.bit.SCIAENCLK = 1;
 
     SciaRegs.SCIFFTX.bit.SCIRST=0;
     SciaRegs.SCICTL1.bit.SWRESET=0; 
@@ -9341,12 +9341,13 @@ void setupInterrupts(){
         PieVectTable.TINT2 = &TIMER2INT;   
      
         PieCtrlRegs.PIEIER1.bit.INTx7 = 1; 
-        PieCtrlRegs.PIEIER8.bit.INTx5 = 1; 
+        
         
         PieCtrlRegs.PIEIER9.bit.INTx1=1;   
+        
      
         IER|=0x0001;                       
-        IER|=0x0080;                       
+        IER|=0x0100;                       
         IER|=0x1000;                      
         IER|=0x2000;                      
     asm(" clrc INTM");

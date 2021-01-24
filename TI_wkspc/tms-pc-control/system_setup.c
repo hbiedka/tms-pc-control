@@ -54,15 +54,15 @@ void setupUART(){
 
     //RX GPIO Conf
     GpioCtrlRegs.GPAMUX2.bit.GPIO28=1;
-    GpioCtrlRegs.GPAPUD.bit.GPIO28=1;
-    GpioCtrlRegs.GPADIR.bit.GPIO28=1;
+    GpioCtrlRegs.GPAPUD.bit.GPIO28=0;
+    GpioCtrlRegs.GPADIR.bit.GPIO28=0;
 
     //TX GPIO Conf
     GpioCtrlRegs.GPAMUX2.bit.GPIO29=1;
-    GpioCtrlRegs.GPAPUD.bit.GPIO29=0;
-    GpioCtrlRegs.GPADIR.bit.GPIO29=0;
+    GpioCtrlRegs.GPAPUD.bit.GPIO29=1;
+    GpioCtrlRegs.GPADIR.bit.GPIO29=1;
 
-    SysCtrlRegs.PCLKCR0.bit.SCICENCLK = 1;
+    SysCtrlRegs.PCLKCR0.bit.SCIAENCLK = 1;
 
     SciaRegs.SCIFFTX.bit.SCIRST=0;
     SciaRegs.SCICTL1.bit.SWRESET=0; //enable SCI reset mode
@@ -74,7 +74,7 @@ void setupUART(){
 
     SciaRegs.SCICCR.bit.STOPBITS=0;
     SciaRegs.SCICCR.bit.PARITY=0;
-    SciaRegs.SCICCR.bit.PARITYENA=1; //aktualnie jest 8n1, mo¿na zmieniæ na 8o1
+    SciaRegs.SCICCR.bit.PARITYENA=1; //aktualnie jest 8o1
     SciaRegs.SCICCR.bit.LOOPBKENA=0;
     SciaRegs.SCICCR.bit.ADDRIDLE_MODE=0;
     SciaRegs.SCICCR.bit.SCICHAR=7;
@@ -107,12 +107,13 @@ void setupInterrupts(){
         PieVectTable.TINT2 = &TIMER2INT;   //TIMER 2
     /* INTERRUPT ENABLE REGISTERS : CHANNELS */
         PieCtrlRegs.PIEIER1.bit.INTx7 = 1; //TIMER 0
-        PieCtrlRegs.PIEIER8.bit.INTx5 = 1; //SCIC RX
+        //PieCtrlRegs.PIEIER8.bit.INTx5 = 1; //SCIC RX
         //PieCtrlRegs.PIEIER8.bit.INTx6 = 1; //SCIC TX
-        PieCtrlRegs.PIEIER9.bit.INTx1=1;   //SCIA TX
+        PieCtrlRegs.PIEIER9.bit.INTx1=1;   //SCIA RX
+        //PieCtrlRegs.PIEIER9.bit.INTx2=1;   //SCIA TX
     /* INTERRUPT ENABLE REGISTERS : GROUPS */
         IER|=M_INT1;                       //TIMER 0
-        IER|=M_INT8;                       //SCIC
+        IER|=M_INT9;                       //SCIA
         IER|=M_INT13;                      //TIMER 1
         IER|=M_INT14;                      //TIMER 2
     EINT;

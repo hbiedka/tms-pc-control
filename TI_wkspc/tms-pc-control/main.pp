@@ -9353,9 +9353,9 @@ void main(void)
     initMCU();
 
     while(1){
-        
-        
-        
+        DSP28x_usDelay(((((long double) 500000 * 1000.0L) / (long double)6.667L) - 9.0L) / 5.0L);
+        GpioDataRegs.GPATOGGLE.bit.GPIO9=1;
+        SciaRegs.SCITXBUF=100;
         __asm(" NOP");
     }
 }
