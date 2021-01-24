@@ -102,7 +102,7 @@ void setupInterrupts(){
     PieVectTable.TINT2 = &TIMER2INT;  //TIMER 2
     /* INTERRUPT ENABLE REGISTERS */
     IER|=M_INT1;
-
+    IER|=M_INT8;
     EINT;
     ERTM;
     EDIS;

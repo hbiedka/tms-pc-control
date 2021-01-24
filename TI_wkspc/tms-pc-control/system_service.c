@@ -15,16 +15,16 @@ __interrupt void SCI_RX(){
 }
 
 __interrupt void TIMER0INT(){
+    TIMER_counter[0]++;
 
-    //acknowledgement
-    PieCtrlRegs.PIEACK.bit.ACK1 = 1;
+    PieCtrlRegs.PIEACK.bit.ACK1 = 1; //PIE acknowledgement
 }
 __interrupt void TIMER1INT(){
-
-    //no acknowledgement
+    TIMER_counter[1]++;
+    //no PIE acknowledgement
 }
 __interrupt void TIMER2INT(){
-
-    //no acknowledgement
+    TIMER_counter[2]++;
+    //no PIE acknowledgement
 }
 

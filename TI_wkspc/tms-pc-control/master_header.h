@@ -8,6 +8,7 @@
 #ifndef MASTER_HEADER_H_
     #define MASTER_HEADER_H_
 
+    #include "system_structures.h"
     #include "system_externs.h"
     #include "DSP28x_Project.h"
     #include "math.h"

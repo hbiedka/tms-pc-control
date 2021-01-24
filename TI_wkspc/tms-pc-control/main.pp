@@ -6,12 +6,39 @@
  
 
 
-extern unsigned int Timer_Multiplier[3];
 
+
+
+
+ 
+
+
+struct TMS_state {
+    short pb_gpio[2];
+    short enc_gpio;
+
+    short led_gpio[2];
+
+    float vr_adc[2];
+
+    float pwm_freq[6];
+    float pwm_duty[6];
+
+    float tim_freq[3];
+};
+
+typedef struct TMS_state TMS_state;
+
+
+ 
+extern TMS_state state;
+ 
+extern unsigned long int TIMER_counter[3];
+extern unsigned int Timer_MultiplierTmp[3];
+extern unsigned int Timer_Multiplier[3];
+ 
 extern unsigned long int RX_counter;
 extern unsigned char RX_char;
-
-
 
 
 
@@ -28,12 +55,15 @@ extern unsigned char RX_char;
  
 
 
+ 
+extern TMS_state state;
+ 
+extern unsigned long int TIMER_counter[3];
+extern unsigned int Timer_MultiplierTmp[3];
 extern unsigned int Timer_Multiplier[3];
-
+ 
 extern unsigned long int RX_counter;
 extern unsigned char RX_char;
-
-
 
 
 
@@ -9194,22 +9224,6 @@ __interrupt void TIMER2INT();
 
  
 
-
-struct TMS_state {
-    short pb_gpio[2];
-    short enc_gpio;
-
-    short led_gpio[2];
-
-    float vr_adc[2];
-
-    float pwm_freq[6];
-    float pwm_duty[6];
-
-    float tim_freq[3];
-};
-
-typedef struct TMS_state TMS_state;
 
 void updateState(TMS_state state);
 void setLED(short index,short state);

@@ -13,12 +13,39 @@
  
 
 
-extern unsigned int Timer_Multiplier[3];
 
+
+
+
+ 
+
+
+struct TMS_state {
+    short pb_gpio[2];
+    short enc_gpio;
+
+    short led_gpio[2];
+
+    float vr_adc[2];
+
+    float pwm_freq[6];
+    float pwm_duty[6];
+
+    float tim_freq[3];
+};
+
+typedef struct TMS_state TMS_state;
+
+
+ 
+extern TMS_state state;
+ 
+extern unsigned long int TIMER_counter[3];
+extern unsigned int Timer_MultiplierTmp[3];
+extern unsigned int Timer_Multiplier[3];
+ 
 extern unsigned long int RX_counter;
 extern unsigned char RX_char;
-
-
 
 
 
@@ -35,12 +62,15 @@ extern unsigned char RX_char;
  
 
 
+ 
+extern TMS_state state;
+ 
+extern unsigned long int TIMER_counter[3];
+extern unsigned int Timer_MultiplierTmp[3];
 extern unsigned int Timer_Multiplier[3];
-
+ 
 extern unsigned long int RX_counter;
 extern unsigned char RX_char;
-
-
 
 
 
@@ -9202,22 +9232,6 @@ __interrupt void TIMER2INT();
  
 
 
-struct TMS_state {
-    short pb_gpio[2];
-    short enc_gpio;
-
-    short led_gpio[2];
-
-    float vr_adc[2];
-
-    float pwm_freq[6];
-    float pwm_duty[6];
-
-    float tim_freq[3];
-};
-
-typedef struct TMS_state TMS_state;
-
 void updateState(TMS_state state);
 void setLED(short index,short state);
 void setPWMduty(short index, float freq);
@@ -9233,16 +9247,16 @@ __interrupt void SCI_RX(){
 }
 
 __interrupt void TIMER0INT(){
+    TIMER_counter[0]++;
 
-    
-    PieCtrlRegs.PIEACK.bit.ACK1 = 1;
+    PieCtrlRegs.PIEACK.bit.ACK1 = 1; 
 }
 __interrupt void TIMER1INT(){
-
+    TIMER_counter[1]++;
     
 }
 __interrupt void TIMER2INT(){
-
+    TIMER_counter[2]++;
     
 }
 
