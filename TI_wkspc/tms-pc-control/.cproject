@@ -52,6 +52,9 @@
 									<listOptionValue builtIn="false" value="_DEBUG"/>
 									<listOptionValue builtIn="false" value="LARGE_MODEL"/>
 								</option>
+								<option id="com.ti.ccstudio.buildDefinitions.C2000_20.2.compilerID.PREPROC_MODE.104758472" superClass="com.ti.ccstudio.buildDefinitions.C2000_20.2.compilerID.PREPROC_MODE" value="com.ti.ccstudio.buildDefinitions.C2000_20.2.compilerID.PREPROC_MODE.manual" valueType="enumerated"/>
+								<option id="com.ti.ccstudio.buildDefinitions.C2000_20.2.compilerID.PREPROC_ONLY.459557794" superClass="com.ti.ccstudio.buildDefinitions.C2000_20.2.compilerID.PREPROC_ONLY" value="true" valueType="boolean"/>
+								<option id="com.ti.ccstudio.buildDefinitions.C2000_20.2.compilerID.PREPROC_WITH_COMPILE.1209577359" superClass="com.ti.ccstudio.buildDefinitions.C2000_20.2.compilerID.PREPROC_WITH_COMPILE" value="true" valueType="boolean"/>
 								<inputType id="com.ti.ccstudio.buildDefinitions.C2000_20.2.compiler.inputType__C_SRCS.464778140" name="C Sources" superClass="com.ti.ccstudio.buildDefinitions.C2000_20.2.compiler.inputType__C_SRCS"/>
 								<inputType id="com.ti.ccstudio.buildDefinitions.C2000_20.2.compiler.inputType__CPP_SRCS.76253948" name="C++ Sources" superClass="com.ti.ccstudio.buildDefinitions.C2000_20.2.compiler.inputType__CPP_SRCS"/>
 								<inputType id="com.ti.ccstudio.buildDefinitions.C2000_20.2.compiler.inputType__ASM_SRCS.695246492" name="Assembly Sources" superClass="com.ti.ccstudio.buildDefinitions.C2000_20.2.compiler.inputType__ASM_SRCS"/>

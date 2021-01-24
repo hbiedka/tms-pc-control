@@ -5,6 +5,7 @@
  *      Author: Bogdan
  */
 
+#include "system_externs.h"
 #include "master_header.h"
 
 void updateState(struct TMS_state state){

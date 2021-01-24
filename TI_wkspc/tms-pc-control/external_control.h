@@ -19,10 +19,12 @@ struct TMS_state {
     float pwm_freq[6];
     float pwm_duty[6];
 
-    float tim_freq[2];
+    float tim_freq[3];
 };
 
-void updateState(struct TMS_state state);
+typedef struct TMS_state TMS_state;
+
+void updateState(TMS_state state);
 void setLED(short index,short state);
 void setPWMduty(short index, float freq);
 void setTimerFreq(short index, float freq);
