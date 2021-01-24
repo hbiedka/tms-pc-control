@@ -47,6 +47,8 @@ extern unsigned long TIMER_PRD[3];
  
 extern unsigned long int RX_counter;
 extern unsigned char RX_char;
+ 
+extern short encoder_bin[4];
 
 
 
@@ -73,6 +75,8 @@ extern unsigned long TIMER_PRD[3];
  
 extern unsigned long int RX_counter;
 extern unsigned char RX_char;
+ 
+extern short encoder_bin[4];
 
 
 
@@ -9202,6 +9206,7 @@ _Pragma("diag_pop")
 
 unsigned long definePRD(float T);
 unsigned int defineQuotient(float T);
+void readEncoder(void);
 
 
 
@@ -9227,7 +9232,7 @@ __interrupt void TIMER1INT();
 __interrupt void TIMER2INT();
 __interrupt void BUTTON1INT();
 __interrupt void BUTTON2INT();
-short readEncoder();
+__interrupt void ENCODERINT();
 
 
 
@@ -9242,16 +9247,21 @@ void setLED(short index,short state);
 void setPWMduty(short index, float freq);
 void setTimerFreq(short index, float freq);
 
+
      
      
 
 
+ 
      
     TMS_state state;                               
+     
     unsigned long int TIMER_counter[3] = {0,0,0};  
     unsigned int TIMER_multiplier[3] = {0,0,0};    
     unsigned int TIMER_multiplierTmp[3] = {0,0,0}; 
     unsigned long TIMER_PRD[3] = {150000000,150000000,150000000};          
+     
     unsigned long int RX_counter = 0;              
     unsigned char RX_char;                         
-
+     
+    extern short encoder_bin[4] = {0,0,0,0};

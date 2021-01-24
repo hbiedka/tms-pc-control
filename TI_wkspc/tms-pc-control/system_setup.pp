@@ -47,6 +47,8 @@ extern unsigned long TIMER_PRD[3];
  
 extern unsigned long int RX_counter;
 extern unsigned char RX_char;
+ 
+extern short encoder_bin[4];
 
 
 
@@ -73,6 +75,8 @@ extern unsigned long TIMER_PRD[3];
  
 extern unsigned long int RX_counter;
 extern unsigned char RX_char;
+ 
+extern short encoder_bin[4];
 
 
 
@@ -9202,6 +9206,7 @@ _Pragma("diag_pop")
 
 unsigned long definePRD(float T);
 unsigned int defineQuotient(float T);
+void readEncoder(void);
 
 
 
@@ -9227,7 +9232,7 @@ __interrupt void TIMER1INT();
 __interrupt void TIMER2INT();
 __interrupt void BUTTON1INT();
 __interrupt void BUTTON2INT();
-short readEncoder();
+__interrupt void ENCODERINT();
 
 
 
@@ -9241,6 +9246,7 @@ void updateState(TMS_state state);
 void setLED(short index,short state);
 void setPWMduty(short index, float freq);
 void setTimerFreq(short index, float freq);
+
 
      
      
@@ -9347,6 +9353,7 @@ void setupInterrupts(){
         PieVectTable.TINT2 = &TIMER2INT;   
         PieVectTable.XINT1 = &BUTTON1INT;  
         PieVectTable.XINT3 = &BUTTON2INT;  
+        PieVectTable.XINT2 = &ENCODERINT;  
      
         PieCtrlRegs.PIEIER1.bit.INTx7 = 1; 
         
@@ -9355,14 +9362,15 @@ void setupInterrupts(){
         
         PieCtrlRegs.PIEIER1.bit.INTx4 = 1; 
         PieCtrlRegs.PIEIER12.bit.INTx1 = 1;
+        PieCtrlRegs.PIEIER1.bit.INTx5 = 1; 
+
      
         IER|=0x0001;                       
-        
         IER|=0x0100;                       
         IER|=0x0800;                      
         IER|=0x1000;                      
         IER|=0x2000;                      
-        PieCtrlRegs.PIEIER9.bit.INTx1=1;   
+        
     asm(" clrc INTM");
     asm(" clrc DBGM");
     asm(" EDIS");
@@ -9371,6 +9379,10 @@ void setupInterrupts(){
 
 void setupGPIO(){
     asm(" EALLOW");
+     
+    GpioCtrlRegs.GPACTRL.bit.QUALPRD1 = 255;   
+    GpioCtrlRegs.GPACTRL.bit.QUALPRD2 = 255;   
+    GpioCtrlRegs.GPBCTRL.bit.QUALPRD2 = 255;   
      
     GpioCtrlRegs.GPAMUX1.bit.GPIO9 = 0x00;
     GpioCtrlRegs.GPADIR.bit.GPIO9 = 1;
@@ -9391,7 +9403,6 @@ void setupGPIO(){
     GpioCtrlRegs.GPAPUD.bit.GPIO17 = 1;
     GpioCtrlRegs.GPAMUX2.bit.GPIO17 = 0;
     GpioCtrlRegs.GPADIR.bit.GPIO17 = 0;
-    GpioCtrlRegs.GPACTRL.bit.QUALPRD2 = 255;   
     GpioCtrlRegs.GPAQSEL2.bit.GPIO17 = 2;      
     GpioIntRegs.GPIOXINT1SEL.bit.GPIOSEL = 17;
     XIntruptRegs.XINT1CR.bit.ENABLE = 1;
@@ -9400,13 +9411,35 @@ void setupGPIO(){
     GpioCtrlRegs.GPBPUD.bit.GPIO48 = 1;
     GpioCtrlRegs.GPBMUX2.bit.GPIO48 = 0;
     GpioCtrlRegs.GPBDIR.bit.GPIO48 = 0;
-    GpioCtrlRegs.GPBCTRL.bit.QUALPRD2 = 255;
     GpioCtrlRegs.GPBQSEL2.bit.GPIO48 = 2;
     GpioIntRegs.GPIOXINT3SEL.bit.GPIOSEL = (Uint16)(48 % 32);
     XIntruptRegs.XINT3CR.bit.ENABLE = 1;
     XIntruptRegs.XINT3CR.bit.POLARITY = 3;
      
+    GpioCtrlRegs.GPAPUD.bit.GPIO12 = 1;
+    GpioCtrlRegs.GPAMUX1.bit.GPIO12 = 0;
+    GpioCtrlRegs.GPADIR.bit.GPIO12 = 0;
+    GpioCtrlRegs.GPAQSEL1.bit.GPIO12 = 2;
+    GpioIntRegs.GPIOXINT2SEL.bit.GPIOSEL = 12;  
+    XIntruptRegs.XINT2CR.bit.ENABLE = 1;
+    XIntruptRegs.XINT2CR.bit.POLARITY = 3;      
 
+    GpioCtrlRegs.GPAPUD.bit.GPIO13 = 1;
+    GpioCtrlRegs.GPAMUX1.bit.GPIO13 = 0;
+    GpioCtrlRegs.GPADIR.bit.GPIO13 = 0;
+    GpioCtrlRegs.GPAQSEL1.bit.GPIO13 = 2;
+
+    GpioCtrlRegs.GPAPUD.bit.GPIO14 = 1;
+    GpioCtrlRegs.GPAMUX1.bit.GPIO14 = 0;
+    GpioCtrlRegs.GPADIR.bit.GPIO14 = 0;
+    GpioCtrlRegs.GPAQSEL1.bit.GPIO14 = 2;
+
+    GpioCtrlRegs.GPAPUD.bit.GPIO15 = 1;
+    GpioCtrlRegs.GPAMUX1.bit.GPIO15 = 0;
+    GpioCtrlRegs.GPADIR.bit.GPIO15 = 0;
+    GpioCtrlRegs.GPAQSEL1.bit.GPIO15 = 2;
+
+     
     asm(" EDIS");
 }
 
@@ -9440,7 +9473,7 @@ void initMCU(void){
     asm(" EDIS");
     state.pb_gpio[0] = !GpioDataRegs . GPADAT . bit . GPIO17;
     state.pb_gpio[1] = !GpioDataRegs . GPBDAT . bit . GPIO48;
-    state.enc_gpio = readEncoder();
+    readEncoder();
 }
 
 

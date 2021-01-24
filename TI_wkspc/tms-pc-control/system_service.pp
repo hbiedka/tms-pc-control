@@ -47,6 +47,8 @@ extern unsigned long TIMER_PRD[3];
  
 extern unsigned long int RX_counter;
 extern unsigned char RX_char;
+ 
+extern short encoder_bin[4];
 
 
 
@@ -73,6 +75,8 @@ extern unsigned long TIMER_PRD[3];
  
 extern unsigned long int RX_counter;
 extern unsigned char RX_char;
+ 
+extern short encoder_bin[4];
 
 
 
@@ -9202,6 +9206,7 @@ _Pragma("diag_pop")
 
 unsigned long definePRD(float T);
 unsigned int defineQuotient(float T);
+void readEncoder(void);
 
 
 
@@ -9227,7 +9232,7 @@ __interrupt void TIMER1INT();
 __interrupt void TIMER2INT();
 __interrupt void BUTTON1INT();
 __interrupt void BUTTON2INT();
-short readEncoder();
+__interrupt void ENCODERINT();
 
 
 
@@ -9242,6 +9247,7 @@ void setLED(short index,short state);
 void setPWMduty(short index, float freq);
 void setTimerFreq(short index, float freq);
 
+
      
      
 
@@ -9250,6 +9256,11 @@ __interrupt void SCI_RX(){
     RX_counter++;
     PieCtrlRegs.PIEACK.all = (0x0080 & 0x0100);
     RX_char=SciaRegs.SCIRXBUF.bit.RXDT; 
+}
+
+__interrupt void ENCODERINT(){
+    readEncoder();
+    PieCtrlRegs.PIEACK.all = 0x0001;
 }
 
 __interrupt void BUTTON1INT(){
@@ -9311,8 +9322,3 @@ __interrupt void TIMER2INT(){
             }
     
 }
-
-short readEncoder(){
-    return 0;
-}
-

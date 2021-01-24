@@ -17,3 +17,5 @@ extern unsigned long TIMER_PRD[3];
 /* UART */
 extern unsigned long int RX_counter;
 extern unsigned char RX_char;
+/* GPIO */
+extern short encoder_bin[4];

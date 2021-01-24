@@ -109,22 +109,24 @@ void setupInterrupts(){
         PieVectTable.TINT2 = &TIMER2INT;   //TIMER 2
         PieVectTable.XINT1 = &BUTTON1INT;  //BUTTON 1
         PieVectTable.XINT3 = &BUTTON2INT;  //BUTTON 2
+        PieVectTable.XINT2 = &ENCODERINT;  //HEX ENCODER
     /* INTERRUPT ENABLE REGISTERS : CHANNELS */
         PieCtrlRegs.PIEIER1.bit.INTx7 = 1; //TIMER 0
         //PieCtrlRegs.PIEIER8.bit.INTx5 = 1; //SCIC RX
         //PieCtrlRegs.PIEIER8.bit.INTx6 = 1; //SCIC TX
         PieCtrlRegs.PIEIER9.bit.INTx1=1;   //SCIA RX
-        //PieCtrlRegs.PIEIER9.bit.INTx2=1;   //SCIA TX
+        //PieCtrlRegs.PIEIER9.bit.INTx2=1; //SCIA TX
         PieCtrlRegs.PIEIER1.bit.INTx4 = 1; //PB1
         PieCtrlRegs.PIEIER12.bit.INTx1 = 1;//PB2
+        PieCtrlRegs.PIEIER1.bit.INTx5 = 1; //HEX ENCODER
+
     /* INTERRUPT ENABLE REGISTERS : GROUPS */
-        IER|=M_INT1;                       //TIMER 0, PB1,
-        //IER|=M_INT8;                       //       ,    , SCIC
-        IER|=M_INT9;                       //       ,    , SCIARX
-        IER|=M_INT12;                      //       , PB2,
-        IER|=M_INT13;                      //TIMER 1,    ,
-        IER|=M_INT14;                      //TIMER 2,    ,
-        PieCtrlRegs.PIEIER9.bit.INTx1=1;   //SCIA RX
+        IER|=M_INT1;                       //TIMER 0, ENC, PB1,
+        IER|=M_INT9;                       //       ,    ,    , SCIA
+        IER|=M_INT12;                      //       ,    , PB2,
+        IER|=M_INT13;                      //TIMER 1,    ,    ,
+        IER|=M_INT14;                      //TIMER 2,    ,    ,
+        //IER|=M_INT8;                       //       ,    ,    , SCIC
     EINT;
     ERTM;
     EDIS;
@@ -133,6 +135,10 @@ void setupInterrupts(){
 
 void setupGPIO(){
     EALLOW;
+    /* GPIO input qualifiers */
+    GpioCtrlRegs.GPACTRL.bit.QUALPRD1 = 255;   //sampling period for GPIO12:15 (hex encoder)
+    GpioCtrlRegs.GPACTRL.bit.QUALPRD2 = 255;   //sampling period for GPIO17 (PB1)
+    GpioCtrlRegs.GPBCTRL.bit.QUALPRD2 = 255;   //sampling period for GPIO17 (PB1)
     /* LED 1 */
     GpioCtrlRegs.GPAMUX1.bit.GPIO9 = 0x00;
     GpioCtrlRegs.GPADIR.bit.GPIO9 = 1;
@@ -153,7 +159,6 @@ void setupGPIO(){
     GpioCtrlRegs.GPAPUD.bit.GPIO17 = 1;
     GpioCtrlRegs.GPAMUX2.bit.GPIO17 = 0;
     GpioCtrlRegs.GPADIR.bit.GPIO17 = 0;
-    GpioCtrlRegs.GPACTRL.bit.QUALPRD2 = 255;   //sampling period for GPIO17
     GpioCtrlRegs.GPAQSEL2.bit.GPIO17 = 2;      //6 samples taken
     GpioIntRegs.GPIOXINT1SEL.bit.GPIOSEL = 17;
     XIntruptRegs.XINT1CR.bit.ENABLE = 1;
@@ -162,13 +167,35 @@ void setupGPIO(){
     GpioCtrlRegs.GPBPUD.bit.GPIO48 = 1;
     GpioCtrlRegs.GPBMUX2.bit.GPIO48 = 0;
     GpioCtrlRegs.GPBDIR.bit.GPIO48 = 0;
-    GpioCtrlRegs.GPBCTRL.bit.QUALPRD2 = 255;
     GpioCtrlRegs.GPBQSEL2.bit.GPIO48 = 2;
     GpioIntRegs.GPIOXINT3SEL.bit.GPIOSEL = (Uint16)(48 % 32);
     XIntruptRegs.XINT3CR.bit.ENABLE = 1;
     XIntruptRegs.XINT3CR.bit.POLARITY = 3;
     /* Hex encoder */
+    GpioCtrlRegs.GPAPUD.bit.GPIO12 = 1;
+    GpioCtrlRegs.GPAMUX1.bit.GPIO12 = 0;
+    GpioCtrlRegs.GPADIR.bit.GPIO12 = 0;
+    GpioCtrlRegs.GPAQSEL1.bit.GPIO12 = 2;
+    GpioIntRegs.GPIOXINT2SEL.bit.GPIOSEL = 12;  //LSB triggers hex interrupt
+    XIntruptRegs.XINT2CR.bit.ENABLE = 1;
+    XIntruptRegs.XINT2CR.bit.POLARITY = 3;      //any change of LSB should trigger interrupt
 
+    GpioCtrlRegs.GPAPUD.bit.GPIO13 = 1;
+    GpioCtrlRegs.GPAMUX1.bit.GPIO13 = 0;
+    GpioCtrlRegs.GPADIR.bit.GPIO13 = 0;
+    GpioCtrlRegs.GPAQSEL1.bit.GPIO13 = 2;
+
+    GpioCtrlRegs.GPAPUD.bit.GPIO14 = 1;
+    GpioCtrlRegs.GPAMUX1.bit.GPIO14 = 0;
+    GpioCtrlRegs.GPADIR.bit.GPIO14 = 0;
+    GpioCtrlRegs.GPAQSEL1.bit.GPIO14 = 2;
+
+    GpioCtrlRegs.GPAPUD.bit.GPIO15 = 1;
+    GpioCtrlRegs.GPAMUX1.bit.GPIO15 = 0;
+    GpioCtrlRegs.GPADIR.bit.GPIO15 = 0;
+    GpioCtrlRegs.GPAQSEL1.bit.GPIO15 = 2;
+
+    /* *END* */
     EDIS;
 }
 
@@ -202,7 +229,7 @@ void initMCU(void){
     EDIS;
     state.pb_gpio[0] = PB1_STATE;
     state.pb_gpio[1] = PB2_STATE;
-    state.enc_gpio = readEncoder();
+    readEncoder();
 }
 
 

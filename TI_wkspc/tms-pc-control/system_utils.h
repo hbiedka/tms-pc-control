@@ -10,5 +10,6 @@
 
 unsigned long definePRD(float T);
 unsigned int defineQuotient(float T);
+void readEncoder(void);
 
 #endif /* SYSTEM_UTILS_H_ */

@@ -18,6 +18,7 @@
     #include "system_setup.h"
     #include "system_service.h"
     #include "external_control.h"
+
     /* CONSTANTS */
     #define LEN(arr) ((int) (sizeof (arr) / sizeof (arr)[0])) //array's length
     #define TMS_CLOCKFREQUENCY 150E+6f                        //TMS320F28335 clock frequency in Hz

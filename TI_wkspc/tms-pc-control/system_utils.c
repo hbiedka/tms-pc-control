@@ -22,3 +22,14 @@ unsigned int defineQuotient(float T){
         return (unsigned int)(T*TIMER_INVTHRESHOLD*TMS_CLOCKFREQUENCY);
 }
 
+void readEncoder(void){
+    encoder_bin[0]=GpioDataRegs.GPADAT.bit.GPIO12;
+    encoder_bin[1]=GpioDataRegs.GPADAT.bit.GPIO13;
+    encoder_bin[2]=GpioDataRegs.GPADAT.bit.GPIO14;
+    encoder_bin[3]=GpioDataRegs.GPADAT.bit.GPIO15;
+
+    state.enc_gpio =  encoder_bin[0];
+    state.enc_gpio += encoder_bin[1]*2;
+    state.enc_gpio += encoder_bin[2]*4;
+    state.enc_gpio += encoder_bin[3]*8;
+}

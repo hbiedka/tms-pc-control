@@ -14,6 +14,6 @@ __interrupt void TIMER1INT();
 __interrupt void TIMER2INT();
 __interrupt void BUTTON1INT();
 __interrupt void BUTTON2INT();
-short readEncoder();
+__interrupt void ENCODERINT();
 
 #endif /* SYSTEM_SERVICE_H_ */
