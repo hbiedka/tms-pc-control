@@ -9233,6 +9233,7 @@ __interrupt void TIMER2INT();
 __interrupt void BUTTON1INT();
 __interrupt void BUTTON2INT();
 __interrupt void ENCODERINT();
+__interrupt void ADCINT();
 
 
 
@@ -9249,13 +9250,24 @@ void setTimerFreq(short index, float freq);
 
 
      
+
      
+
 
 
 __interrupt void SCI_RX(){
     RX_counter++;
     PieCtrlRegs.PIEACK.all = (0x0080 & 0x0100);
     RX_char=SciaRegs.SCIRXBUF.bit.RXDT; 
+}
+
+__interrupt void ADCINT(){
+    state.vr_adc[0] = 0.0002442002442L*(long double)AdcMirror . ADCRESULT0;
+    state.vr_adc[1] = 0.0002442002442L*(long double)AdcMirror . ADCRESULT1;
+     
+    AdcRegs . ADCTRL2 . bit . RST_SEQ1 = 1;
+    AdcRegs.ADCST.bit.INT_SEQ1_CLR = 1;
+    PieCtrlRegs.PIEACK.all = 0x0001;
 }
 
 __interrupt void ENCODERINT(){
@@ -9265,11 +9277,19 @@ __interrupt void ENCODERINT(){
 
 __interrupt void BUTTON1INT(){
     state.pb_gpio[0] = !GpioDataRegs . GPADAT . bit . GPIO17;
+    if (state.pb_gpio[0])
+        GpioDataRegs . GPASET . bit . GPIO9 = 1;
+    else
+        GpioDataRegs . GPACLEAR . bit . GPIO9 = 1;
     PieCtrlRegs.PIEACK.all = 0x0001;
 }
 
 __interrupt void BUTTON2INT(){
     state.pb_gpio[1] = !GpioDataRegs . GPBDAT . bit . GPIO48;
+    if (state.pb_gpio[1])
+            GpioDataRegs . GPASET . bit . GPIO11 = 1;
+        else
+            GpioDataRegs . GPACLEAR . bit . GPIO11 = 1;
     PieCtrlRegs.PIEACK.all = 0x0800;
 }
 
@@ -9280,7 +9300,7 @@ __interrupt void TIMER0INT(){
         TIMER_multiplierTmp[0] = TIMER_multiplier[0];
          
         ++TIMER_counter[0];
-
+        AdcRegs . ADCTRL2 . bit . SOC_SEQ1 = 1;
         }
         else{
             CpuTimer0Regs.PRD.all = 4294967295U-26;

@@ -27,7 +27,15 @@
     #define TIMER_INVTHRESHOLD 2.3283064e-10L                 //inverse of timer capacity
     #define TIMER_MINPRD 150000                               //1 kHz max
     #define TIMER_INTERRUPTDELAY 26                           //delay between start of interrupt and TIM update
+    #define ADC_CAPACITY 4095                                 //ADC 12 bit
+    #define ADC_INVCAPACITY 0.0002442002442L                  //inversion of the above
+
     /* REGISTER MACROS */
+    #define ADC_STARTCONV AdcRegs.ADCTRL2.bit.SOC_SEQ1 = 1   //begin conversion cycle on SEQ1
+    #define ADC_RESETSEQ1 AdcRegs.ADCTRL2.bit.RST_SEQ1 = 1   //reset sequencer 1
+    #define ADC_VR1VALUE  AdcMirror.ADCRESULT0               //value read from VR1 (potentiometer)
+    #define ADC_VR2VALUE  AdcMirror.ADCRESULT1               //value read from VR2 (potentiometer)
+
     #define PB1_STATE !GpioDataRegs.GPADAT.bit.GPIO17         //read state of PB1
     #define PB2_STATE !GpioDataRegs.GPBDAT.bit.GPIO48         //read state of PB2
 

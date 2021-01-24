@@ -9233,6 +9233,7 @@ __interrupt void TIMER2INT();
 __interrupt void BUTTON1INT();
 __interrupt void BUTTON2INT();
 __interrupt void ENCODERINT();
+__interrupt void ADCINT();
 
 
 
@@ -9249,7 +9250,9 @@ void setTimerFreq(short index, float freq);
 
 
      
+
      
+
 
 
 void setupTimers(void){
@@ -9338,6 +9341,30 @@ void setupUART(){
     asm(" EDIS");
 }
 
+void setupADC(void){
+    
+    InitAdc();
+    asm(" EALLOW");
+    SysCtrlRegs.HISPCP.bit.HSPCLK = 6;
+    AdcRegs.ADCTRL3.bit.ADCCLKPS = 0;
+    AdcRegs.ADCTRL1.bit.CPS = 1;
+    AdcRegs.ADCTRL1.bit.ACQ_PS = 15; 
+    AdcRegs.ADCCHSELSEQ1.bit.CONV00 = 0; 
+    AdcRegs.ADCCHSELSEQ1.bit.CONV01 = 1; 
+    AdcRegs.ADCTRL1.bit.SEQ_CASC = 0; 
+    AdcRegs.ADCTRL1.bit.SEQ_OVRD = 0; 
+    AdcRegs.ADCTRL1.bit.CONT_RUN = 0; 
+    AdcRegs.ADCMAXCONV.bit.MAX_CONV1 = 1; 
+
+    AdcRegs.ADCTRL2.bit.EPWM_SOCA_SEQ1 = 0; 
+    AdcRegs.ADCTRL2.bit.EXT_SOC_SEQ1 = 0;   
+
+    AdcRegs.ADCTRL2.bit.INT_MOD_SEQ1 = 0; 
+    AdcRegs.ADCTRL2.bit.INT_ENA_SEQ1 = 1; 
+    AdcRegs.ADCTRL2.bit.SOC_SEQ1 = 1; 
+    asm(" EDIS");
+}
+
 
 void setupInterrupts(){
     asm(" setc INTM");
@@ -9354,6 +9381,7 @@ void setupInterrupts(){
         PieVectTable.XINT1 = &BUTTON1INT;  
         PieVectTable.XINT3 = &BUTTON2INT;  
         PieVectTable.XINT2 = &ENCODERINT;  
+        PieVectTable.SEQ1INT = &ADCINT;    
      
         PieCtrlRegs.PIEIER1.bit.INTx7 = 1; 
         
@@ -9363,6 +9391,7 @@ void setupInterrupts(){
         PieCtrlRegs.PIEIER1.bit.INTx4 = 1; 
         PieCtrlRegs.PIEIER12.bit.INTx1 = 1;
         PieCtrlRegs.PIEIER1.bit.INTx5 = 1; 
+        PieCtrlRegs.PIEIER1.bit.INTx1 = 1; 
 
      
         IER|=0x0001;                       
@@ -9453,7 +9482,9 @@ void setupTMSstate(){
         state.pwm_duty[i] = 0.1/6.0*i;
         state.pwm_freq[i] = 10.0*pow(10.0,i*0.5);
     }
+    GpioDataRegs . GPBSET . bit . GPIO34 = 1;
     state.led_gpio[0] = 1;
+    GpioDataRegs . GPBSET . bit . GPIO49 = 1;
     state.led_gpio[1] = 1;
     state.pb_gpio[0] = !GpioDataRegs . GPADAT . bit . GPIO17;
     state.pb_gpio[1] = !GpioDataRegs . GPBDAT . bit . GPIO48;
@@ -9466,6 +9497,7 @@ void initMCU(void){
     setupGPIO();
     
     setupTimers();
+    setupADC();
     asm(" EALLOW");
     PieCtrlRegs.PIECTRL.bit.ENPIE=1;
     asm(" clrc INTM"); 

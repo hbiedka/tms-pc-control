@@ -14,6 +14,15 @@ __interrupt void SCI_RX(){
     RX_char=SciaRegs.SCIRXBUF.bit.RXDT; //read received character
 }
 
+__interrupt void ADCINT(){
+    state.vr_adc[0] = ADC_INVCAPACITY*(long double)ADC_VR1VALUE;
+    state.vr_adc[1] = ADC_INVCAPACITY*(long double)ADC_VR2VALUE;
+    /* Reset and acknowledgments */
+    ADC_RESETSEQ1;
+    AdcRegs.ADCST.bit.INT_SEQ1_CLR = 1;
+    PieCtrlRegs.PIEACK.all = PIEACK_GROUP1;
+}
+
 __interrupt void ENCODERINT(){
     readEncoder();
     PieCtrlRegs.PIEACK.all = PIEACK_GROUP1;
@@ -21,11 +30,19 @@ __interrupt void ENCODERINT(){
 
 __interrupt void BUTTON1INT(){
     state.pb_gpio[0] = PB1_STATE;
+    if (state.pb_gpio[0])
+        LED1_ON;
+    else
+        LED1_OFF;
     PieCtrlRegs.PIEACK.all = PIEACK_GROUP1;
 }
 
 __interrupt void BUTTON2INT(){
     state.pb_gpio[1] = PB2_STATE;
+    if (state.pb_gpio[1])
+            LED2_ON;
+        else
+            LED2_OFF;
     PieCtrlRegs.PIEACK.all = PIEACK_GROUP12;
 }
 
@@ -36,7 +53,7 @@ __interrupt void TIMER0INT(){
         TIMER_multiplierTmp[0] = TIMER_multiplier[0];
         /* CODE GOES HERE */
         ++TIMER_counter[0];
-
+        ADC_STARTCONV;
         }
         else{
             CpuTimer0Regs.PRD.all = TIMER_THRESHOLD-TIMER_INTERRUPTDELAY;

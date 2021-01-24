@@ -94,6 +94,30 @@ void setupUART(){
     EDIS;
 }
 
+void setupADC(void){
+    //6.25 Mhz conversion rate
+    InitAdc();
+    EALLOW;
+    SysCtrlRegs.HISPCP.bit.HSPCLK = 6;
+    AdcRegs.ADCTRL3.bit.ADCCLKPS = 0;
+    AdcRegs.ADCTRL1.bit.CPS = 1;
+    AdcRegs.ADCTRL1.bit.ACQ_PS = 15; //full SOC duty ==> max acquisition time
+    AdcRegs.ADCCHSELSEQ1.bit.CONV00 = 0; //CONV00 reads A0 physical ADC pin
+    AdcRegs.ADCCHSELSEQ1.bit.CONV01 = 1; //CONV01 reads A1 physical ADC pin
+    AdcRegs.ADCTRL1.bit.SEQ_CASC = 0; //dual sequencer mode
+    AdcRegs.ADCTRL1.bit.SEQ_OVRD = 0; //disable sequencer override
+    AdcRegs.ADCTRL1.bit.CONT_RUN = 0; //continuous conversion mode disable
+    AdcRegs.ADCMAXCONV.bit.MAX_CONV1 = 1; //sequencer wraps around second of its CONV channel (01) IF autoconversion is active
+
+    AdcRegs.ADCTRL2.bit.EPWM_SOCA_SEQ1 = 0; //disable ePWM SOC for sequencers
+    AdcRegs.ADCTRL2.bit.EXT_SOC_SEQ1 = 0;   //disable external start-of-conversion init
+
+    AdcRegs.ADCTRL2.bit.INT_MOD_SEQ1 = 0; //set INT_SEQ1 on every sequence
+    AdcRegs.ADCTRL2.bit.INT_ENA_SEQ1 = 1; //enable SEQ1 interrupt
+    AdcRegs.ADCTRL2.bit.SOC_SEQ1 = 1; //start ADC conversion
+    EDIS;
+}
+
 
 void setupInterrupts(){
     DINT;
@@ -110,6 +134,7 @@ void setupInterrupts(){
         PieVectTable.XINT1 = &BUTTON1INT;  //BUTTON 1
         PieVectTable.XINT3 = &BUTTON2INT;  //BUTTON 2
         PieVectTable.XINT2 = &ENCODERINT;  //HEX ENCODER
+        PieVectTable.SEQ1INT = &ADCINT;    //ADC SEQ1
     /* INTERRUPT ENABLE REGISTERS : CHANNELS */
         PieCtrlRegs.PIEIER1.bit.INTx7 = 1; //TIMER 0
         //PieCtrlRegs.PIEIER8.bit.INTx5 = 1; //SCIC RX
@@ -119,6 +144,7 @@ void setupInterrupts(){
         PieCtrlRegs.PIEIER1.bit.INTx4 = 1; //PB1
         PieCtrlRegs.PIEIER12.bit.INTx1 = 1;//PB2
         PieCtrlRegs.PIEIER1.bit.INTx5 = 1; //HEX ENCODER
+        PieCtrlRegs.PIEIER1.bit.INTx1 = 1; //ADC SEQ1
 
     /* INTERRUPT ENABLE REGISTERS : GROUPS */
         IER|=M_INT1;                       //TIMER 0, ENC, PB1,
@@ -209,7 +235,9 @@ void setupTMSstate(){
         state.pwm_duty[i] = 0.1/6.0*i;
         state.pwm_freq[i] = 10.0*pow(10.0,i*0.5);
     }
+    LED3_ON;
     state.led_gpio[0] = 1;
+    LED4_ON;
     state.led_gpio[1] = 1;
     state.pb_gpio[0] = PB1_STATE;
     state.pb_gpio[1] = PB2_STATE;
@@ -222,6 +250,7 @@ void initMCU(void){
     setupGPIO();
     //setupUART();
     setupTimers();
+    setupADC();
     EALLOW;
     PieCtrlRegs.PIECTRL.bit.ENPIE=1;
     EINT; // enable global interrupts
