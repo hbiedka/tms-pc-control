@@ -9,7 +9,7 @@ void main(void)
     initMCU();
 
     while(1){
-        DELAY_US(100000);
+        DELAY_US(500000);
         SciaRegs.SCITXBUF=100;
         __asm(" NOP");
     }

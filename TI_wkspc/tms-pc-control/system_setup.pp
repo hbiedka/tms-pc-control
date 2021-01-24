@@ -9225,6 +9225,9 @@ __interrupt void SCI_RX();
 __interrupt void TIMER0INT();
 __interrupt void TIMER1INT();
 __interrupt void TIMER2INT();
+__interrupt void BUTTON1INT();
+__interrupt void BUTTON2INT();
+short readEncoder();
 
 
 
@@ -9239,7 +9242,8 @@ void setLED(short index,short state);
 void setPWMduty(short index, float freq);
 void setTimerFreq(short index, float freq);
 
-
+     
+     
 
 
 void setupTimers(void){
@@ -9248,17 +9252,20 @@ void setupTimers(void){
     CpuTimer1Regs.TCR.bit.TSS = 1;
     CpuTimer2Regs.TCR.bit.TSS = 1;
 
-    TIMER_PRD[0] = definePRD(60.0);                
+    float T = 1.0/10.0e3;
+    TIMER_PRD[0] = definePRD(T);                
     CpuTimer0Regs.PRD.all = TIMER_PRD[0];
-    TIMER_multiplier[0] = defineQuotient(60.0);    
+    TIMER_multiplier[0] = defineQuotient(T);    
     TIMER_multiplierTmp[0] = TIMER_multiplier[0];
-    TIMER_PRD[1] = definePRD(6.0);
+    T = 1.0;
+    TIMER_PRD[1] = definePRD(T);
     CpuTimer1Regs.PRD.all = TIMER_PRD[1];
-    TIMER_multiplier[1] = defineQuotient(6.0);
+    TIMER_multiplier[1] = defineQuotient(T);
     TIMER_multiplierTmp[1] = TIMER_multiplier[1];
-    TIMER_PRD[2] = definePRD(1.0);
+    T = 60.0;
+    TIMER_PRD[2] = definePRD(T);
     CpuTimer2Regs.PRD.all = TIMER_PRD[2];
-    TIMER_multiplier[2] = defineQuotient(1.0);
+    TIMER_multiplier[2] = defineQuotient(T);
     TIMER_multiplierTmp[2] = TIMER_multiplier[2];
 
     CpuTimer0Regs.TPR.bit.TDDR = 0x00;   
@@ -9329,27 +9336,33 @@ void setupUART(){
 void setupInterrupts(){
     asm(" setc INTM");
     InitPieCtrl();
+    IER=0x0000;
+    IFR=0x0000;
     InitPieVectTable();
     asm(" EALLOW");
-    IER=0;
-    IFR=0;
-    PieCtrlRegs.PIECTRL.bit.ENPIE=1;
      
-        PieVectTable.SCIRXINTA=&SCI_RX;    
+        PieVectTable.SCIRXINTA = &SCI_RX;  
         PieVectTable.TINT0 = &TIMER0INT;   
         PieVectTable.XINT13 = &TIMER1INT;  
         PieVectTable.TINT2 = &TIMER2INT;   
+        PieVectTable.XINT1 = &BUTTON1INT;  
+        PieVectTable.XINT3 = &BUTTON2INT;  
      
         PieCtrlRegs.PIEIER1.bit.INTx7 = 1; 
         
         
         PieCtrlRegs.PIEIER9.bit.INTx1=1;   
         
+        PieCtrlRegs.PIEIER1.bit.INTx4 = 1; 
+        PieCtrlRegs.PIEIER12.bit.INTx1 = 1;
      
         IER|=0x0001;                       
+        
         IER|=0x0100;                       
+        IER|=0x0800;                      
         IER|=0x1000;                      
         IER|=0x2000;                      
+        PieCtrlRegs.PIEIER9.bit.INTx1=1;   
     asm(" clrc INTM");
     asm(" clrc DBGM");
     asm(" EDIS");
@@ -9357,21 +9370,77 @@ void setupInterrupts(){
 
 
 void setupGPIO(){
+    asm(" EALLOW");
+     
+    GpioCtrlRegs.GPAMUX1.bit.GPIO9 = 0x00;
+    GpioCtrlRegs.GPADIR.bit.GPIO9 = 1;
+    GpioCtrlRegs.GPAPUD.bit.GPIO9 = 1;
+     
+    GpioCtrlRegs.GPAMUX1.bit.GPIO11 = 0x00;
+    GpioCtrlRegs.GPADIR.bit.GPIO11 = 1;
+    GpioCtrlRegs.GPAPUD.bit.GPIO11 = 1;
+     
+    GpioCtrlRegs.GPBMUX1.bit.GPIO34 = 0x00;
+    GpioCtrlRegs.GPBDIR.bit.GPIO34 = 1;
+    GpioCtrlRegs.GPBPUD.bit.GPIO34 = 1;
+     
+    GpioCtrlRegs.GPBMUX2.bit.GPIO49 = 0x00;
+    GpioCtrlRegs.GPBDIR.bit.GPIO49 = 1;
+    GpioCtrlRegs.GPBPUD.bit.GPIO49 = 1;
+     
+    GpioCtrlRegs.GPAPUD.bit.GPIO17 = 1;
+    GpioCtrlRegs.GPAMUX2.bit.GPIO17 = 0;
+    GpioCtrlRegs.GPADIR.bit.GPIO17 = 0;
+    GpioCtrlRegs.GPACTRL.bit.QUALPRD2 = 255;   
+    GpioCtrlRegs.GPAQSEL2.bit.GPIO17 = 2;      
+    GpioIntRegs.GPIOXINT1SEL.bit.GPIOSEL = 17;
+    XIntruptRegs.XINT1CR.bit.ENABLE = 1;
+    XIntruptRegs.XINT1CR.bit.POLARITY = 3;
+     
+    GpioCtrlRegs.GPBPUD.bit.GPIO48 = 1;
+    GpioCtrlRegs.GPBMUX2.bit.GPIO48 = 0;
+    GpioCtrlRegs.GPBDIR.bit.GPIO48 = 0;
+    GpioCtrlRegs.GPBCTRL.bit.QUALPRD2 = 255;
+    GpioCtrlRegs.GPBQSEL2.bit.GPIO48 = 2;
+    GpioIntRegs.GPIOXINT3SEL.bit.GPIOSEL = (Uint16)(48 % 32);
+    XIntruptRegs.XINT3CR.bit.ENABLE = 1;
+    XIntruptRegs.XINT3CR.bit.POLARITY = 3;
+     
 
+    asm(" EDIS");
+}
+
+void setupTMSstate(){
+    int i;
+    for(i=0;i<6;++i){
+        if (i<2)
+            state.led_gpio[i] = 1;
+        if (i<3)
+            state.tim_freq[i] = 0.1*pow(10.0,(float)i);
+        state.pwm_duty[i] = 0.1/6.0*i;
+        state.pwm_freq[i] = 10.0*pow(10.0,i*0.5);
+    }
+    state.led_gpio[0] = 1;
+    state.led_gpio[1] = 1;
+    state.pb_gpio[0] = !GpioDataRegs . GPADAT . bit . GPIO17;
+    state.pb_gpio[1] = !GpioDataRegs . GPBDAT . bit . GPIO48;
 }
 
 void initMCU(void){
     InitSysCtrl();
-    setupGPIO();      
+    setupTMSstate();  
     setupInterrupts();
-    setupUART();
-    setupTimers();
+    setupGPIO();
     
+    setupTimers();
     asm(" EALLOW");
-    GpioCtrlRegs.GPAMUX1.bit.GPIO9=0;
-    GpioCtrlRegs.GPAPUD.bit.GPIO9=1;
-    GpioCtrlRegs.GPADIR.bit.GPIO9=1;
+    PieCtrlRegs.PIECTRL.bit.ENPIE=1;
+    asm(" clrc INTM"); 
+    asm(" clrc DBGM"); 
     asm(" EDIS");
+    state.pb_gpio[0] = !GpioDataRegs . GPADAT . bit . GPIO17;
+    state.pb_gpio[1] = !GpioDataRegs . GPBDAT . bit . GPIO48;
+    state.enc_gpio = readEncoder();
 }
 
 

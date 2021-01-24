@@ -113,13 +113,14 @@ void setupInterrupts(){
         PieCtrlRegs.PIEIER1.bit.INTx7 = 1; //TIMER 0
         //PieCtrlRegs.PIEIER8.bit.INTx5 = 1; //SCIC RX
         //PieCtrlRegs.PIEIER8.bit.INTx6 = 1; //SCIC TX
-        PieCtrlRegs.PIEIER9.bit.INTx1=1;   //SCIA TX
+        PieCtrlRegs.PIEIER9.bit.INTx1=1;   //SCIA RX
+        //PieCtrlRegs.PIEIER9.bit.INTx2=1;   //SCIA TX
         PieCtrlRegs.PIEIER1.bit.INTx4 = 1; //PB1
         PieCtrlRegs.PIEIER12.bit.INTx1 = 1;//PB2
     /* INTERRUPT ENABLE REGISTERS : GROUPS */
         IER|=M_INT1;                       //TIMER 0, PB1,
-        IER|=M_INT8;                       //       ,    , SCIC
-        IER|=M_INT9;                       //       ,    , SCIA
+        //IER|=M_INT8;                       //       ,    , SCIC
+        IER|=M_INT9;                       //       ,    , SCIARX
         IER|=M_INT12;                      //       , PB2,
         IER|=M_INT13;                      //TIMER 1,    ,
         IER|=M_INT14;                      //TIMER 2,    ,
