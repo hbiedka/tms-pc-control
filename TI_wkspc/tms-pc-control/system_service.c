@@ -20,9 +20,11 @@ void PWM_setDuty(){
 }
 
 __interrupt void SCI_RX(){
+
     RX_counter++;
-    PieCtrlRegs.PIEACK.all = (PIEACK_GROUP8 & PIEACK_GROUP9);
     RX_char=SciaRegs.SCIRXBUF.bit.RXDT; //read received character
+
+    PieCtrlRegs.PIEACK.all = (PIEACK_GROUP8 & PIEACK_GROUP9); //PIE ack.
 }
 
 __interrupt void ADCINT(){

@@ -9280,9 +9280,12 @@ void PWM_setDuty(){
 }
 
 __interrupt void SCI_RX(){
+
     RX_counter++;
     PieCtrlRegs.PIEACK.all = (0x0080 & 0x0100);
     RX_char=SciaRegs.SCIRXBUF.bit.RXDT; 
+
+    PieCtrlRegs.PIEACK.all = (0x0080 & 0x0100); 
 }
 
 __interrupt void ADCINT(){

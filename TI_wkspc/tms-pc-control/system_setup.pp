@@ -9336,7 +9336,7 @@ void setupUART(){
     SciaRegs.SCIFFRX.bit.RXFIFORESET=0;
 
     SysCtrlRegs.LOSPCP.bit.LSPCLK=0; 
-    SciaRegs.SCIHBAUD=0x01;
+    SciaRegs.SCIHBAUD=0x01; 
     SciaRegs.SCILBAUD=0x45;
 
     SciaRegs.SCICCR.bit.STOPBITS=0;

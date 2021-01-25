@@ -76,7 +76,7 @@ void setupUART(){
     SciaRegs.SCIFFRX.bit.RXFIFORESET=0;
 
     SysCtrlRegs.LOSPCP.bit.LSPCLK=0; //sysclk/1
-    SciaRegs.SCIHBAUD=0x01;
+    SciaRegs.SCIHBAUD=0x01; //57600 baud
     SciaRegs.SCILBAUD=0x45;
 
     SciaRegs.SCICCR.bit.STOPBITS=0;
