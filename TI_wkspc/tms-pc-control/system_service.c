@@ -8,6 +8,17 @@
 #include "system_externs.h"
 #include "master_header.h"
 
+void PWM_setDuty(){
+    EALLOW;
+    EPwm1Regs.CMPA.half.CMPA = state.pwm_duty[0]*PWM_PRD[0];
+    EPwm2Regs.CMPA.half.CMPA = state.pwm_duty[1]*PWM_PRD[1];
+    EPwm3Regs.CMPA.half.CMPA = state.pwm_duty[2]*PWM_PRD[2];
+    EPwm4Regs.CMPA.half.CMPA = state.pwm_duty[3]*PWM_PRD[3];
+    EPwm5Regs.CMPA.half.CMPA = state.pwm_duty[4]*PWM_PRD[4];
+    EPwm6Regs.CMPA.half.CMPA = state.pwm_duty[5]*PWM_PRD[5];
+    EDIS;
+}
+
 __interrupt void SCI_RX(){
     RX_counter++;
     PieCtrlRegs.PIEACK.all = (PIEACK_GROUP8 & PIEACK_GROUP9);
@@ -30,19 +41,19 @@ __interrupt void ENCODERINT(){
 
 __interrupt void BUTTON1INT(){
     state.pb_gpio[0] = PB1_STATE;
-    if (state.pb_gpio[0])
-        LED1_ON;
-    else
-        LED1_OFF;
     PieCtrlRegs.PIEACK.all = PIEACK_GROUP1;
 }
 
 __interrupt void BUTTON2INT(){
     state.pb_gpio[1] = PB2_STATE;
-    if (state.pb_gpio[1])
-            LED2_ON;
-        else
-            LED2_OFF;
+    EALLOW;
+    EPwm1Regs.TZCLR.bit.OST = 1;
+    EPwm2Regs.TZCLR.bit.OST = 1;
+    EPwm3Regs.TZCLR.bit.OST = 1;
+    EPwm4Regs.TZCLR.bit.OST = 1;
+    EPwm5Regs.TZCLR.bit.OST = 1;
+    EPwm6Regs.TZCLR.bit.OST = 1;
+    EDIS;
     PieCtrlRegs.PIEACK.all = PIEACK_GROUP12;
 }
 

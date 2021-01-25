@@ -30,6 +30,7 @@ struct TMS_state {
 
     float pwm_freq[6];
     float pwm_duty[6];
+    float pwm_deadtime[6];
 
     float tim_freq[3];
 };
@@ -49,6 +50,11 @@ extern unsigned long int RX_counter;
 extern unsigned char RX_char;
  
 extern short encoder_bin[4];
+ 
+extern unsigned int PWM_CLKDIVOPTION[8];
+extern unsigned int PWM_HSPCLKDIVOPTION[8];
+extern unsigned short PWM_PRD[6];
+extern unsigned int PWM_DIV[6];
 
 
 
@@ -77,6 +83,11 @@ extern unsigned long int RX_counter;
 extern unsigned char RX_char;
  
 extern short encoder_bin[4];
+ 
+extern unsigned int PWM_CLKDIVOPTION[8];
+extern unsigned int PWM_HSPCLKDIVOPTION[8];
+extern unsigned short PWM_PRD[6];
+extern unsigned int PWM_DIV[6];
 
 
 
@@ -9207,6 +9218,8 @@ _Pragma("diag_pop")
 unsigned long definePRD(float T);
 unsigned int defineQuotient(float T);
 void readEncoder(void);
+void definePWM_DIVSandPRD(float PWMfreq,short PWMchannel);
+void defineDeadBand(float deadtime,short PWMchannel);
 
 
 
@@ -9234,6 +9247,7 @@ __interrupt void BUTTON1INT();
 __interrupt void BUTTON2INT();
 __interrupt void ENCODERINT();
 __interrupt void ADCINT();
+void PWM_setDuty();
 
 
 
@@ -9243,58 +9257,72 @@ __interrupt void ADCINT();
  
 
 
-void updateState(TMS_state state);
 void setLED(short index,short state);
-void setPWMduty(short index, float freq);
+void setPWMfreq(short index, float freq);
 void setTimerFreq(short index, float freq);
+void setDeadTime(short index, float deadtime);
 
 
      
-
      
 
 
 
-void updateState(struct TMS_state state){
-
+void setLED(short index,short value){
+    if (index==3){
+        if (value==0) GpioDataRegs . GPBCLEAR . bit . GPIO34 = 1;
+        else          GpioDataRegs . GPBSET . bit . GPIO34 = 1;
+        state.led_gpio[0] = value;
+    }
+    if (index==4){
+        if (value==0) GpioDataRegs . GPBCLEAR . bit . GPIO49 = 1;
+        else          GpioDataRegs . GPBSET . bit . GPIO49 = 1;
+        state.led_gpio[1] = value;
+    }
 }
 
-void setLED(short index,short state){
-    
+void setPWMfreq(short index, float freq){
+    definePWM_DIVSandPRD(freq,index);
+    defineDeadBand(state.pwm_deadtime[index], index);
+    state.pwm_freq[index] = (long double)PWM_PRD[index]/(75E+6*PWM_DIV[index]);
 }
 
-void setPWMduty(short index, float freq){
-
+void setDeadTime(short index, float deadtime){
+    defineDeadBand(deadtime, index);
+    state.pwm_deadtime[index] = deadtime;
 }
 
 void setTimerFreq(short index, float freq){
     float T = 1.0/freq;
     if (index == 0){
         TIMER_PRD[0] = definePRD(T);
-        if (TIMER_PRD[0] < 150000)
-            TIMER_PRD[0] = 150000;
+        if (TIMER_PRD[0] < 15000)
+            TIMER_PRD[0] = 15000;
         CpuTimer0Regs.PRD.all = TIMER_PRD[0];
         TIMER_multiplier[0] = defineQuotient(T);
         TIMER_multiplierTmp[0] = TIMER_multiplier[0];
         CpuTimer0Regs.TCR.bit.TRB = 1;
+        state.tim_freq[0] = 1.0/((TIMER_PRD[0]+TIMER_multiplier[0]*4294967295U)*0.0000000066666666666666666667f);
     }
     else if (index == 1){
         TIMER_PRD[1] = definePRD(T);
-        if (TIMER_PRD[1] < 150000)
-            TIMER_PRD[1] = 150000;
+        if (TIMER_PRD[1] < 15000)
+            TIMER_PRD[1] = 15000;
         CpuTimer1Regs.PRD.all = TIMER_PRD[1];
         TIMER_multiplier[1] = defineQuotient(T);
         TIMER_multiplierTmp[1] = TIMER_multiplier[1];
         CpuTimer1Regs.TCR.bit.TRB = 1;
+        state.tim_freq[1] = 1.0/((TIMER_PRD[1]+TIMER_multiplier[1]*4294967295U)*0.0000000066666666666666666667f);
     }
     else if (index==2){
         TIMER_PRD[2] = definePRD(T);
-        if (TIMER_PRD[2] < 150000)
-            TIMER_PRD[2] = 150000;
+        if (TIMER_PRD[2] < 15000)
+            TIMER_PRD[2] = 15000;
         CpuTimer2Regs.PRD.all = TIMER_PRD[2];
         TIMER_multiplier[2] = defineQuotient(T);
         TIMER_multiplierTmp[2] = TIMER_multiplier[2];
         CpuTimer2Regs.TCR.bit.TRB = 1;
+        state.tim_freq[2] = 1.0/((TIMER_PRD[2]+TIMER_multiplier[2]*4294967295U)*0.0000000066666666666666666667f);
     }
 }
 

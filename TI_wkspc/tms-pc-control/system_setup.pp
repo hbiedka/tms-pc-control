@@ -30,6 +30,7 @@ struct TMS_state {
 
     float pwm_freq[6];
     float pwm_duty[6];
+    float pwm_deadtime[6];
 
     float tim_freq[3];
 };
@@ -49,6 +50,11 @@ extern unsigned long int RX_counter;
 extern unsigned char RX_char;
  
 extern short encoder_bin[4];
+ 
+extern unsigned int PWM_CLKDIVOPTION[8];
+extern unsigned int PWM_HSPCLKDIVOPTION[8];
+extern unsigned short PWM_PRD[6];
+extern unsigned int PWM_DIV[6];
 
 
 
@@ -77,6 +83,11 @@ extern unsigned long int RX_counter;
 extern unsigned char RX_char;
  
 extern short encoder_bin[4];
+ 
+extern unsigned int PWM_CLKDIVOPTION[8];
+extern unsigned int PWM_HSPCLKDIVOPTION[8];
+extern unsigned short PWM_PRD[6];
+extern unsigned int PWM_DIV[6];
 
 
 
@@ -9207,6 +9218,8 @@ _Pragma("diag_pop")
 unsigned long definePRD(float T);
 unsigned int defineQuotient(float T);
 void readEncoder(void);
+void definePWM_DIVSandPRD(float PWMfreq,short PWMchannel);
+void defineDeadBand(float deadtime,short PWMchannel);
 
 
 
@@ -9234,6 +9247,7 @@ __interrupt void BUTTON1INT();
 __interrupt void BUTTON2INT();
 __interrupt void ENCODERINT();
 __interrupt void ADCINT();
+void PWM_setDuty();
 
 
 
@@ -9243,14 +9257,13 @@ __interrupt void ADCINT();
  
 
 
-void updateState(TMS_state state);
 void setLED(short index,short state);
-void setPWMduty(short index, float freq);
+void setPWMfreq(short index, float freq);
 void setTimerFreq(short index, float freq);
+void setDeadTime(short index, float deadtime);
 
 
      
-
      
 
 
@@ -9261,21 +9274,21 @@ void setupTimers(void){
     CpuTimer1Regs.TCR.bit.TSS = 1;
     CpuTimer2Regs.TCR.bit.TSS = 1;
 
-    float T = 1.0/10.0e3;
-    TIMER_PRD[0] = definePRD(T);                
-    CpuTimer0Regs.PRD.all = TIMER_PRD[0];
-    TIMER_multiplier[0] = defineQuotient(T);    
-    TIMER_multiplierTmp[0] = TIMER_multiplier[0];
-    T = 1.0;
-    TIMER_PRD[1] = definePRD(T);
-    CpuTimer1Regs.PRD.all = TIMER_PRD[1];
-    TIMER_multiplier[1] = defineQuotient(T);
-    TIMER_multiplierTmp[1] = TIMER_multiplier[1];
-    T = 60.0;
-    TIMER_PRD[2] = definePRD(T);
-    CpuTimer2Regs.PRD.all = TIMER_PRD[2];
-    TIMER_multiplier[2] = defineQuotient(T);
-    TIMER_multiplierTmp[2] = TIMER_multiplier[2];
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     CpuTimer0Regs.TPR.bit.TDDR = 0x00;   
     CpuTimer0Regs.TPRH.bit.TDDRH = 0x00;
@@ -9283,6 +9296,10 @@ void setupTimers(void){
     CpuTimer1Regs.TPRH.bit.TDDRH = 0x00;
     CpuTimer2Regs.TPR.bit.TDDR = 0x00;
     CpuTimer2Regs.TPRH.bit.TDDRH = 0x00;
+
+    setTimerFreq(0,state.tim_freq[0]);
+    setTimerFreq(1,state.tim_freq[1]);
+    setTimerFreq(2,state.tim_freq[2]);
 
     XIntruptRegs.XNMICR.bit.SELECT = 0;  
 
@@ -9341,6 +9358,131 @@ void setupUART(){
     asm(" EDIS");
 }
 
+void setupPWM(void){
+    asm(" EALLOW");
+     
+    GpioCtrlRegs.GPAMUX1.bit.GPIO0 = 1;  
+    GpioCtrlRegs.GPAMUX1.bit.GPIO1 = 1;  
+    GpioCtrlRegs.GPAMUX1.bit.GPIO2 = 1;  
+    GpioCtrlRegs.GPAMUX1.bit.GPIO3 = 1;  
+    GpioCtrlRegs.GPAMUX1.bit.GPIO4 = 1;  
+    GpioCtrlRegs.GPAMUX1.bit.GPIO5 = 1;  
+    GpioCtrlRegs.GPAMUX1.bit.GPIO6 = 1;  
+    GpioCtrlRegs.GPAMUX1.bit.GPIO7 = 1;  
+    GpioCtrlRegs.GPAMUX1.bit.GPIO8 = 1;  
+    GpioCtrlRegs.GPAMUX1.bit.GPIO9 = 1;  
+    GpioCtrlRegs.GPAMUX1.bit.GPIO10 = 1; 
+    GpioCtrlRegs.GPAMUX1.bit.GPIO11 = 1; 
+
+    GpioCtrlRegs.GPADIR.bit.GPIO0 = 1;   
+    GpioCtrlRegs.GPADIR.bit.GPIO1 = 1;   
+    GpioCtrlRegs.GPADIR.bit.GPIO2 = 1;   
+    GpioCtrlRegs.GPADIR.bit.GPIO3 = 1;   
+    GpioCtrlRegs.GPADIR.bit.GPIO4 = 1;   
+    GpioCtrlRegs.GPADIR.bit.GPIO5 = 1;   
+    GpioCtrlRegs.GPADIR.bit.GPIO6 = 1;   
+    GpioCtrlRegs.GPADIR.bit.GPIO7 = 1;   
+    GpioCtrlRegs.GPADIR.bit.GPIO8 = 1;   
+    GpioCtrlRegs.GPADIR.bit.GPIO9 = 1;   
+    GpioCtrlRegs.GPADIR.bit.GPIO10 = 1;  
+    GpioCtrlRegs.GPADIR.bit.GPIO11 = 1;  
+
+
+     
+    EPwm1Regs.TBCTL.bit.CTRMODE = 2;    
+    EPwm1Regs.TBCTL.bit.FREE_SOFT = 3;  
+    EPwm1Regs.AQCTLA.bit.CAU=1;         
+    EPwm1Regs.AQCTLA.bit.CAD=2;         
+    EPwm1Regs.AQCTLB.bit.CBU=1;         
+    EPwm1Regs.AQCTLB.bit.CBD=2;         
+    EPwm1Regs.DBCTL.bit.IN_MODE = 0;    
+    EPwm1Regs.DBCTL.bit.OUT_MODE = 3;   
+    EPwm1Regs.DBCTL.bit.POLSEL = 2;     
+    EPwm1Regs.TZSEL.bit.OSHT6 = 1;      
+    EPwm1Regs.TZCTL.bit.TZA = 2;        
+    EPwm1Regs.TZCTL.bit.TZB = 2;        
+
+     
+    EPwm2Regs.TBCTL.bit.CTRMODE = 2;    
+    EPwm2Regs.TBCTL.bit.FREE_SOFT = 3;  
+    EPwm2Regs.AQCTLA.bit.CAU=1;         
+    EPwm2Regs.AQCTLA.bit.CAD=2;         
+    EPwm2Regs.AQCTLB.bit.CBU=1;         
+    EPwm2Regs.AQCTLB.bit.CBD=2;         
+    EPwm2Regs.DBCTL.bit.IN_MODE = 0;    
+    EPwm2Regs.DBCTL.bit.OUT_MODE = 3;   
+    EPwm2Regs.DBCTL.bit.POLSEL = 2;     
+    EPwm2Regs.TZSEL.bit.OSHT6 = 1;      
+    EPwm2Regs.TZCTL.bit.TZA = 2;        
+    EPwm2Regs.TZCTL.bit.TZB = 2;        
+
+     
+    EPwm3Regs.TBCTL.bit.CTRMODE = 2;    
+    EPwm3Regs.TBCTL.bit.FREE_SOFT = 3;  
+    EPwm3Regs.AQCTLA.bit.CAU=1;         
+    EPwm3Regs.AQCTLA.bit.CAD=2;         
+    EPwm3Regs.AQCTLB.bit.CBU=1;         
+    EPwm3Regs.AQCTLB.bit.CBD=2;         
+    EPwm3Regs.DBCTL.bit.IN_MODE = 0;    
+    EPwm3Regs.DBCTL.bit.OUT_MODE = 3;   
+    EPwm3Regs.DBCTL.bit.POLSEL = 2;     
+    EPwm3Regs.TZSEL.bit.OSHT6 = 1;      
+    EPwm3Regs.TZCTL.bit.TZA = 2;        
+    EPwm3Regs.TZCTL.bit.TZB = 2;        
+
+     
+    EPwm4Regs.TBCTL.bit.CTRMODE = 2;    
+    EPwm4Regs.TBCTL.bit.FREE_SOFT = 3;  
+    EPwm4Regs.AQCTLA.bit.CAU=1;         
+    EPwm4Regs.AQCTLA.bit.CAD=2;         
+    EPwm4Regs.AQCTLB.bit.CBU=1;         
+    EPwm4Regs.AQCTLB.bit.CBD=2;         
+    EPwm4Regs.DBCTL.bit.IN_MODE = 0;    
+    EPwm4Regs.DBCTL.bit.OUT_MODE = 3;   
+    EPwm4Regs.DBCTL.bit.POLSEL = 2;     
+    EPwm4Regs.TZSEL.bit.OSHT6 = 1;      
+    EPwm4Regs.TZCTL.bit.TZA = 2;        
+    EPwm4Regs.TZCTL.bit.TZB = 2;        
+
+     
+    EPwm5Regs.TBCTL.bit.CTRMODE = 2;    
+    EPwm5Regs.TBCTL.bit.FREE_SOFT = 3;  
+    EPwm5Regs.AQCTLA.bit.CAU=1;         
+    EPwm5Regs.AQCTLA.bit.CAD=2;         
+    EPwm5Regs.AQCTLB.bit.CBU=1;         
+    EPwm5Regs.AQCTLB.bit.CBD=2;         
+    EPwm5Regs.DBCTL.bit.IN_MODE = 0;    
+    EPwm5Regs.DBCTL.bit.OUT_MODE = 3;   
+    EPwm5Regs.DBCTL.bit.POLSEL = 2;     
+    EPwm5Regs.TZSEL.bit.OSHT6 = 1;      
+    EPwm5Regs.TZCTL.bit.TZA = 2;        
+    EPwm5Regs.TZCTL.bit.TZB = 2;        
+
+     
+    EPwm6Regs.TBCTL.bit.CTRMODE = 2;    
+    EPwm6Regs.TBCTL.bit.FREE_SOFT = 3;  
+    EPwm6Regs.AQCTLA.bit.CAU=1;         
+    EPwm6Regs.AQCTLA.bit.CAD=2;         
+    EPwm6Regs.AQCTLB.bit.CBU=1;         
+    EPwm6Regs.AQCTLB.bit.CBD=2;         
+    EPwm6Regs.DBCTL.bit.IN_MODE = 0;    
+    EPwm6Regs.DBCTL.bit.OUT_MODE = 3;   
+    EPwm6Regs.DBCTL.bit.POLSEL = 2;     
+    EPwm6Regs.TZSEL.bit.OSHT6 = 1;      
+    EPwm6Regs.TZCTL.bit.TZA = 2;        
+    EPwm6Regs.TZCTL.bit.TZB = 2;        
+
+     
+    int i;
+    for (i=0;i<6;++i){
+        definePWM_DIVSandPRD(state.pwm_freq[i], i);
+        defineDeadBand(500.0e-9, i);
+    }
+     
+    PWM_setDuty();
+    asm(" EDIS");
+}
+
 void setupADC(void){
     
     InitAdc();
@@ -9364,7 +9506,6 @@ void setupADC(void){
     AdcRegs.ADCTRL2.bit.SOC_SEQ1 = 1; 
     asm(" EDIS");
 }
-
 
 void setupInterrupts(){
     asm(" setc INTM");
@@ -9430,7 +9571,7 @@ void setupGPIO(){
     GpioCtrlRegs.GPBPUD.bit.GPIO49 = 1;
      
     GpioCtrlRegs.GPAPUD.bit.GPIO17 = 1;
-    GpioCtrlRegs.GPAMUX2.bit.GPIO17 = 0;
+    GpioCtrlRegs.GPAMUX2.bit.GPIO17 = 3;       
     GpioCtrlRegs.GPADIR.bit.GPIO17 = 0;
     GpioCtrlRegs.GPAQSEL2.bit.GPIO17 = 2;      
     GpioIntRegs.GPIOXINT1SEL.bit.GPIOSEL = 17;
@@ -9478,10 +9619,12 @@ void setupTMSstate(){
         if (i<2)
             state.led_gpio[i] = 1;
         if (i<3)
-            state.tim_freq[i] = 0.1*pow(10.0,(float)i);
-        state.pwm_duty[i] = 0.1/6.0*i;
+            state.tim_freq[i] = pow(0.1,(float)(i-1));
+        state.pwm_duty[5-i] = 0.1/6.0*i;
         state.pwm_freq[i] = 10.0*pow(10.0,i*0.5);
+        state.pwm_deadtime[i] = 500.0e-9;
     }
+    state.tim_freq[0] = 10000.0;
     GpioDataRegs . GPBSET . bit . GPIO34 = 1;
     state.led_gpio[0] = 1;
     GpioDataRegs . GPBSET . bit . GPIO49 = 1;
@@ -9495,8 +9638,9 @@ void initMCU(void){
     setupTMSstate();  
     setupInterrupts();
     setupGPIO();
-    
+    setupUART();
     setupTimers();
+    setupPWM();
     setupADC();
     asm(" EALLOW");
     PieCtrlRegs.PIECTRL.bit.ENPIE=1;

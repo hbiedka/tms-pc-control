@@ -30,6 +30,7 @@ struct TMS_state {
 
     float pwm_freq[6];
     float pwm_duty[6];
+    float pwm_deadtime[6];
 
     float tim_freq[3];
 };
@@ -49,6 +50,11 @@ extern unsigned long int RX_counter;
 extern unsigned char RX_char;
  
 extern short encoder_bin[4];
+ 
+extern unsigned int PWM_CLKDIVOPTION[8];
+extern unsigned int PWM_HSPCLKDIVOPTION[8];
+extern unsigned short PWM_PRD[6];
+extern unsigned int PWM_DIV[6];
 
 
 
@@ -77,6 +83,11 @@ extern unsigned long int RX_counter;
 extern unsigned char RX_char;
  
 extern short encoder_bin[4];
+ 
+extern unsigned int PWM_CLKDIVOPTION[8];
+extern unsigned int PWM_HSPCLKDIVOPTION[8];
+extern unsigned short PWM_PRD[6];
+extern unsigned int PWM_DIV[6];
 
 
 
@@ -9207,6 +9218,8 @@ _Pragma("diag_pop")
 unsigned long definePRD(float T);
 unsigned int defineQuotient(float T);
 void readEncoder(void);
+void definePWM_DIVSandPRD(float PWMfreq,short PWMchannel);
+void defineDeadBand(float deadtime,short PWMchannel);
 
 
 
@@ -9234,6 +9247,7 @@ __interrupt void BUTTON1INT();
 __interrupt void BUTTON2INT();
 __interrupt void ENCODERINT();
 __interrupt void ADCINT();
+void PWM_setDuty();
 
 
 
@@ -9243,17 +9257,27 @@ __interrupt void ADCINT();
  
 
 
-void updateState(TMS_state state);
 void setLED(short index,short state);
-void setPWMduty(short index, float freq);
+void setPWMfreq(short index, float freq);
 void setTimerFreq(short index, float freq);
+void setDeadTime(short index, float deadtime);
 
 
      
-
      
 
 
+
+void PWM_setDuty(){
+    asm(" EALLOW");
+    EPwm1Regs.CMPA.half.CMPA = state.pwm_duty[0]*PWM_PRD[0];
+    EPwm2Regs.CMPA.half.CMPA = state.pwm_duty[1]*PWM_PRD[1];
+    EPwm3Regs.CMPA.half.CMPA = state.pwm_duty[2]*PWM_PRD[2];
+    EPwm4Regs.CMPA.half.CMPA = state.pwm_duty[3]*PWM_PRD[3];
+    EPwm5Regs.CMPA.half.CMPA = state.pwm_duty[4]*PWM_PRD[4];
+    EPwm6Regs.CMPA.half.CMPA = state.pwm_duty[5]*PWM_PRD[5];
+    asm(" EDIS");
+}
 
 __interrupt void SCI_RX(){
     RX_counter++;
@@ -9277,19 +9301,19 @@ __interrupt void ENCODERINT(){
 
 __interrupt void BUTTON1INT(){
     state.pb_gpio[0] = !GpioDataRegs . GPADAT . bit . GPIO17;
-    if (state.pb_gpio[0])
-        GpioDataRegs . GPASET . bit . GPIO9 = 1;
-    else
-        GpioDataRegs . GPACLEAR . bit . GPIO9 = 1;
     PieCtrlRegs.PIEACK.all = 0x0001;
 }
 
 __interrupt void BUTTON2INT(){
     state.pb_gpio[1] = !GpioDataRegs . GPBDAT . bit . GPIO48;
-    if (state.pb_gpio[1])
-            GpioDataRegs . GPASET . bit . GPIO11 = 1;
-        else
-            GpioDataRegs . GPACLEAR . bit . GPIO11 = 1;
+    asm(" EALLOW");
+    EPwm1Regs.TZCLR.bit.OST = 1;
+    EPwm2Regs.TZCLR.bit.OST = 1;
+    EPwm3Regs.TZCLR.bit.OST = 1;
+    EPwm4Regs.TZCLR.bit.OST = 1;
+    EPwm5Regs.TZCLR.bit.OST = 1;
+    EPwm6Regs.TZCLR.bit.OST = 1;
+    asm(" EDIS");
     PieCtrlRegs.PIEACK.all = 0x0800;
 }
 

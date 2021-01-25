@@ -19,3 +19,8 @@ extern unsigned long int RX_counter;
 extern unsigned char RX_char;
 /* GPIO */
 extern short encoder_bin[4];
+/* PWMs */
+extern unsigned int PWM_CLKDIVOPTION[8];
+extern unsigned int PWM_HSPCLKDIVOPTION[8];
+extern unsigned short PWM_PRD[6];
+extern unsigned int PWM_DIV[6];

@@ -16,5 +16,6 @@ __interrupt void BUTTON1INT();
 __interrupt void BUTTON2INT();
 __interrupt void ENCODERINT();
 __interrupt void ADCINT();
+void PWM_setDuty();
 
 #endif /* SYSTEM_SERVICE_H_ */

@@ -8,9 +8,9 @@
 #ifndef EXTERNAL_CONTROL_H_
 #define EXTERNAL_CONTROL_H_
 
-void updateState(TMS_state state);
 void setLED(short index,short state);
-void setPWMduty(short index, float freq);
+void setPWMfreq(short index, float freq);
 void setTimerFreq(short index, float freq);
+void setDeadTime(short index, float deadtime);
 
 #endif /* EXTERNAL_CONTROL_H_ */

@@ -14,21 +14,21 @@ void setupTimers(void){
     CpuTimer1Regs.TCR.bit.TSS = 1;
     CpuTimer2Regs.TCR.bit.TSS = 1;
 
-    float T = 1.0/10.0e3;
-    TIMER_PRD[0] = definePRD(T);                //define first PRDs remainder (timer)
-    CpuTimer0Regs.PRD.all = TIMER_PRD[0];
-    TIMER_multiplier[0] = defineQuotient(T);    //quotient
-    TIMER_multiplierTmp[0] = TIMER_multiplier[0];
-    T = 1.0;
-    TIMER_PRD[1] = definePRD(T);
-    CpuTimer1Regs.PRD.all = TIMER_PRD[1];
-    TIMER_multiplier[1] = defineQuotient(T);
-    TIMER_multiplierTmp[1] = TIMER_multiplier[1];
-    T = 60.0;
-    TIMER_PRD[2] = definePRD(T);
-    CpuTimer2Regs.PRD.all = TIMER_PRD[2];
-    TIMER_multiplier[2] = defineQuotient(T);
-    TIMER_multiplierTmp[2] = TIMER_multiplier[2];
+//    float T = 1.0/state.tim_freq[0];
+//    TIMER_PRD[0] = definePRD(T);                //define first PRDs remainder (timer)
+//    CpuTimer0Regs.PRD.all = TIMER_PRD[0];
+//    TIMER_multiplier[0] = defineQuotient(T);    //quotient
+//    TIMER_multiplierTmp[0] = TIMER_multiplier[0];
+//    T = 1.0/state.tim_freq[1];
+//    TIMER_PRD[1] = definePRD(T);
+//    CpuTimer1Regs.PRD.all = TIMER_PRD[1];
+//    TIMER_multiplier[1] = defineQuotient(T);
+//    TIMER_multiplierTmp[1] = TIMER_multiplier[1];
+//    T = 1.0/state.tim_freq[2];
+//    TIMER_PRD[2] = definePRD(T);
+//    CpuTimer2Regs.PRD.all = TIMER_PRD[2];
+//    TIMER_multiplier[2] = defineQuotient(T);
+//    TIMER_multiplierTmp[2] = TIMER_multiplier[2];
 
     CpuTimer0Regs.TPR.bit.TDDR = 0x00;   // no timer prescalers
     CpuTimer0Regs.TPRH.bit.TDDRH = 0x00;
@@ -36,6 +36,10 @@ void setupTimers(void){
     CpuTimer1Regs.TPRH.bit.TDDRH = 0x00;
     CpuTimer2Regs.TPR.bit.TDDR = 0x00;
     CpuTimer2Regs.TPRH.bit.TDDRH = 0x00;
+
+    setTimerFreq(0,state.tim_freq[0]);
+    setTimerFreq(1,state.tim_freq[1]);
+    setTimerFreq(2,state.tim_freq[2]);
 
     XIntruptRegs.XNMICR.bit.SELECT = 0;  //mux on INT13 set to pass Timer 1 interrupt
 
@@ -94,6 +98,131 @@ void setupUART(){
     EDIS;
 }
 
+void setupPWM(void){
+    EALLOW;
+    /* Basic config */
+    GpioCtrlRegs.GPAMUX1.bit.GPIO0 = 1;  // set mux GPIO0  as ePWM1A
+    GpioCtrlRegs.GPAMUX1.bit.GPIO1 = 1;  // set mux GPIO1  as ePWM1B
+    GpioCtrlRegs.GPAMUX1.bit.GPIO2 = 1;  // set mux GPIO2  as ePWM2A
+    GpioCtrlRegs.GPAMUX1.bit.GPIO3 = 1;  // set mux GPIO3  as ePWM2B
+    GpioCtrlRegs.GPAMUX1.bit.GPIO4 = 1;  // set mux GPIO4  as ePWM3A
+    GpioCtrlRegs.GPAMUX1.bit.GPIO5 = 1;  // set mux GPIO5  as ePWM3B
+    GpioCtrlRegs.GPAMUX1.bit.GPIO6 = 1;  // set mux GPIO4  as ePWM4A
+    GpioCtrlRegs.GPAMUX1.bit.GPIO7 = 1;  // set mux GPIO7  as ePWM4B
+    GpioCtrlRegs.GPAMUX1.bit.GPIO8 = 1;  // set mux GPIO8  as ePWM5A
+    GpioCtrlRegs.GPAMUX1.bit.GPIO9 = 1;  // set mux GPIO9  as ePWM5B
+    GpioCtrlRegs.GPAMUX1.bit.GPIO10 = 1; // set mux GPIO10 as ePWM6A
+    GpioCtrlRegs.GPAMUX1.bit.GPIO11 = 1; // set mux GPIO11 as ePWM6B
+
+    GpioCtrlRegs.GPADIR.bit.GPIO0 = 1;   // set PWM GPIOs as output
+    GpioCtrlRegs.GPADIR.bit.GPIO1 = 1;   //...
+    GpioCtrlRegs.GPADIR.bit.GPIO2 = 1;   //...
+    GpioCtrlRegs.GPADIR.bit.GPIO3 = 1;   //...
+    GpioCtrlRegs.GPADIR.bit.GPIO4 = 1;   //...
+    GpioCtrlRegs.GPADIR.bit.GPIO5 = 1;   //...
+    GpioCtrlRegs.GPADIR.bit.GPIO6 = 1;   //...
+    GpioCtrlRegs.GPADIR.bit.GPIO7 = 1;   //...
+    GpioCtrlRegs.GPADIR.bit.GPIO8 = 1;   //...
+    GpioCtrlRegs.GPADIR.bit.GPIO9 = 1;   //...
+    GpioCtrlRegs.GPADIR.bit.GPIO10 = 1;  //...
+    GpioCtrlRegs.GPADIR.bit.GPIO11 = 1;  //...
+
+
+    /* ePWM 1 */
+    EPwm1Regs.TBCTL.bit.CTRMODE = 2;    // Mode: up - down
+    EPwm1Regs.TBCTL.bit.FREE_SOFT = 3;  // free run
+    EPwm1Regs.AQCTLA.bit.CAU=1;         // set output to 0 when CMPA==PWM and counting up
+    EPwm1Regs.AQCTLA.bit.CAD=2;         // set output to 1 when CMPA==PWM and counting down
+    EPwm1Regs.AQCTLB.bit.CBU=1;         // set output to 0 when CMPB==PWM and counting up
+    EPwm1Regs.AQCTLB.bit.CBD=2;         // set output to 1 when CMPB==PWM and counting down
+    EPwm1Regs.DBCTL.bit.IN_MODE = 0;    // both signals depend on channel A
+    EPwm1Regs.DBCTL.bit.OUT_MODE = 3;   // allow full dead time usage
+    EPwm1Regs.DBCTL.bit.POLSEL = 2;     // active high complementary mod
+    EPwm1Regs.TZSEL.bit.OSHT6 = 1;      //enable one-shot trip zone on PB1
+    EPwm1Regs.TZCTL.bit.TZA = 2;        //force channel A to low state on trip zone
+    EPwm1Regs.TZCTL.bit.TZB = 2;        //force channel B to low state on trip zone
+
+    /* ePWM 2 */
+    EPwm2Regs.TBCTL.bit.CTRMODE = 2;    // Mode: up - down
+    EPwm2Regs.TBCTL.bit.FREE_SOFT = 3;  // free run
+    EPwm2Regs.AQCTLA.bit.CAU=1;         // set output to 0 when CMPA==PWM and counting up
+    EPwm2Regs.AQCTLA.bit.CAD=2;         // set output to 1 when CMPA==PWM and counting down
+    EPwm2Regs.AQCTLB.bit.CBU=1;         // set output to 0 when CMPB==PWM and counting up
+    EPwm2Regs.AQCTLB.bit.CBD=2;         // set output to 1 when CMPB==PWM and counting down
+    EPwm2Regs.DBCTL.bit.IN_MODE = 0;    // both signals depend on channel A
+    EPwm2Regs.DBCTL.bit.OUT_MODE = 3;   // allow full dead time usage
+    EPwm2Regs.DBCTL.bit.POLSEL = 2;     // active high complementary mod
+    EPwm2Regs.TZSEL.bit.OSHT6 = 1;      //enable one-shot trip zone on PB1
+    EPwm2Regs.TZCTL.bit.TZA = 2;        //force channel A to low state on trip zone
+    EPwm2Regs.TZCTL.bit.TZB = 2;        //force channel B to low state on trip zone
+
+    /* ePWM 3 */
+    EPwm3Regs.TBCTL.bit.CTRMODE = 2;    // Mode: up - down
+    EPwm3Regs.TBCTL.bit.FREE_SOFT = 3;  // free run
+    EPwm3Regs.AQCTLA.bit.CAU=1;         // set output to 0 when CMPA==PWM and counting up
+    EPwm3Regs.AQCTLA.bit.CAD=2;         // set output to 1 when CMPA==PWM and counting down
+    EPwm3Regs.AQCTLB.bit.CBU=1;         // set output to 0 when CMPB==PWM and counting up
+    EPwm3Regs.AQCTLB.bit.CBD=2;         // set output to 1 when CMPB==PWM and counting down
+    EPwm3Regs.DBCTL.bit.IN_MODE = 0;    // both signals depend on channel A
+    EPwm3Regs.DBCTL.bit.OUT_MODE = 3;   // allow full dead time usage
+    EPwm3Regs.DBCTL.bit.POLSEL = 2;     // active high complementary mod
+    EPwm3Regs.TZSEL.bit.OSHT6 = 1;      //enable one-shot trip zone on PB1
+    EPwm3Regs.TZCTL.bit.TZA = 2;        //force channel A to low state on trip zone
+    EPwm3Regs.TZCTL.bit.TZB = 2;        //force channel B to low state on trip zone
+
+    /* ePWM 4 */
+    EPwm4Regs.TBCTL.bit.CTRMODE = 2;    // Mode: up - down
+    EPwm4Regs.TBCTL.bit.FREE_SOFT = 3;  // free run
+    EPwm4Regs.AQCTLA.bit.CAU=1;         // set output to 0 when CMPA==PWM and counting up
+    EPwm4Regs.AQCTLA.bit.CAD=2;         // set output to 1 when CMPA==PWM and counting down
+    EPwm4Regs.AQCTLB.bit.CBU=1;         // set output to 0 when CMPB==PWM and counting up
+    EPwm4Regs.AQCTLB.bit.CBD=2;         // set output to 1 when CMPB==PWM and counting down
+    EPwm4Regs.DBCTL.bit.IN_MODE = 0;    // both signals depend on channel A
+    EPwm4Regs.DBCTL.bit.OUT_MODE = 3;   // allow full dead time usage
+    EPwm4Regs.DBCTL.bit.POLSEL = 2;     // active high complementary mod
+    EPwm4Regs.TZSEL.bit.OSHT6 = 1;      //enable one-shot trip zone on PB1
+    EPwm4Regs.TZCTL.bit.TZA = 2;        //force channel A to low state on trip zone
+    EPwm4Regs.TZCTL.bit.TZB = 2;        //force channel B to low state on trip zone
+
+    /* ePWM 5 */
+    EPwm5Regs.TBCTL.bit.CTRMODE = 2;    // Mode: up - down
+    EPwm5Regs.TBCTL.bit.FREE_SOFT = 3;  // free run
+    EPwm5Regs.AQCTLA.bit.CAU=1;         // set output to 0 when CMPA==PWM and counting up
+    EPwm5Regs.AQCTLA.bit.CAD=2;         // set output to 1 when CMPA==PWM and counting down
+    EPwm5Regs.AQCTLB.bit.CBU=1;         // set output to 0 when CMPB==PWM and counting up
+    EPwm5Regs.AQCTLB.bit.CBD=2;         // set output to 1 when CMPB==PWM and counting down
+    EPwm5Regs.DBCTL.bit.IN_MODE = 0;    // both signals depend on channel A
+    EPwm5Regs.DBCTL.bit.OUT_MODE = 3;   // allow full dead time usage
+    EPwm5Regs.DBCTL.bit.POLSEL = 2;     // active high complementary mod
+    EPwm5Regs.TZSEL.bit.OSHT6 = 1;      //enable one-shot trip zone on PB1
+    EPwm5Regs.TZCTL.bit.TZA = 2;        //force channel A to low state on trip zone
+    EPwm5Regs.TZCTL.bit.TZB = 2;        //force channel B to low state on trip zone
+
+    /* ePWM 6 */
+    EPwm6Regs.TBCTL.bit.CTRMODE = 2;    // Mode: up - down
+    EPwm6Regs.TBCTL.bit.FREE_SOFT = 3;  // free run
+    EPwm6Regs.AQCTLA.bit.CAU=1;         // set output to 0 when CMPA==PWM and counting up
+    EPwm6Regs.AQCTLA.bit.CAD=2;         // set output to 1 when CMPA==PWM and counting down
+    EPwm6Regs.AQCTLB.bit.CBU=1;         // set output to 0 when CMPB==PWM and counting up
+    EPwm6Regs.AQCTLB.bit.CBD=2;         // set output to 1 when CMPB==PWM and counting down
+    EPwm6Regs.DBCTL.bit.IN_MODE = 0;    // both signals depend on channel A
+    EPwm6Regs.DBCTL.bit.OUT_MODE = 3;   // allow full dead time usage
+    EPwm6Regs.DBCTL.bit.POLSEL = 2;     // active high complementary mod
+    EPwm6Regs.TZSEL.bit.OSHT6 = 1;      //enable one-shot trip zone on PB1
+    EPwm6Regs.TZCTL.bit.TZA = 2;        //force channel A to low state on trip zone
+    EPwm6Regs.TZCTL.bit.TZB = 2;        //force channel B to low state on trip zone
+
+    /* Define PWM PRDs,CLKDIVs,HSPCLKDIVs,DEADTIMEs */
+    int i;
+    for (i=0;i<6;++i){
+        definePWM_DIVSandPRD(state.pwm_freq[i], i);
+        defineDeadBand(500.0e-9, i);
+    }
+    /* Initialize PWM counters */
+    PWM_setDuty();
+    EDIS;
+}
+
 void setupADC(void){
     //6.25 Mhz conversion rate
     InitAdc();
@@ -117,7 +246,6 @@ void setupADC(void){
     AdcRegs.ADCTRL2.bit.SOC_SEQ1 = 1; //start ADC conversion
     EDIS;
 }
-
 
 void setupInterrupts(){
     DINT;
@@ -183,7 +311,7 @@ void setupGPIO(){
     GpioCtrlRegs.GPBPUD.bit.GPIO49 = 1;
     /* Button 1 */
     GpioCtrlRegs.GPAPUD.bit.GPIO17 = 1;
-    GpioCtrlRegs.GPAMUX2.bit.GPIO17 = 0;
+    GpioCtrlRegs.GPAMUX2.bit.GPIO17 = 3;       //TripZone6
     GpioCtrlRegs.GPADIR.bit.GPIO17 = 0;
     GpioCtrlRegs.GPAQSEL2.bit.GPIO17 = 2;      //6 samples taken
     GpioIntRegs.GPIOXINT1SEL.bit.GPIOSEL = 17;
@@ -231,10 +359,12 @@ void setupTMSstate(){
         if (i<2)
             state.led_gpio[i] = 1;
         if (i<3)
-            state.tim_freq[i] = 0.1*pow(10.0,(float)i);
-        state.pwm_duty[i] = 0.1/6.0*i;
+            state.tim_freq[i] = pow(0.1,(float)(i-1));
+        state.pwm_duty[5-i] = 0.1/6.0*i;
         state.pwm_freq[i] = 10.0*pow(10.0,i*0.5);
+        state.pwm_deadtime[i] = 500.0e-9;
     }
+    state.tim_freq[0] = 10000.0;
     LED3_ON;
     state.led_gpio[0] = 1;
     LED4_ON;
@@ -248,8 +378,9 @@ void initMCU(void){
     setupTMSstate();  //BEFORE interrupts!
     setupInterrupts();
     setupGPIO();
-    //setupUART();
+    setupUART();
     setupTimers();
+    setupPWM();
     setupADC();
     EALLOW;
     PieCtrlRegs.PIECTRL.bit.ENPIE=1;

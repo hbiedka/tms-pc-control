@@ -20,4 +20,10 @@
     unsigned long int RX_counter = 0;              //UART counter
     unsigned char RX_char;                         //UART RX
     /* GPIO */
-    extern short encoder_bin[4] = {0,0,0,0};
+    short encoder_bin[4] = {0,0,0,0};
+    /* PWMs */
+    unsigned int PWM_CLKDIVOPTION[8] = {1,2,4,8,16,32,64,128};
+    unsigned int PWM_HSPCLKDIVOPTION[8] = {1,2,4,6,8,10,12,14};
+    unsigned short PWM_PRD[6] = {65535,65535,65535,65535,65535,65535};
+    unsigned int PWM_DIV[6] = {2,2,2,2,2,2};
+

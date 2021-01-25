@@ -30,6 +30,7 @@ struct TMS_state {
 
     float pwm_freq[6];
     float pwm_duty[6];
+    float pwm_deadtime[6];
 
     float tim_freq[3];
 };
@@ -49,6 +50,11 @@ extern unsigned long int RX_counter;
 extern unsigned char RX_char;
  
 extern short encoder_bin[4];
+ 
+extern unsigned int PWM_CLKDIVOPTION[8];
+extern unsigned int PWM_HSPCLKDIVOPTION[8];
+extern unsigned short PWM_PRD[6];
+extern unsigned int PWM_DIV[6];
 
 
 
@@ -77,6 +83,11 @@ extern unsigned long int RX_counter;
 extern unsigned char RX_char;
  
 extern short encoder_bin[4];
+ 
+extern unsigned int PWM_CLKDIVOPTION[8];
+extern unsigned int PWM_HSPCLKDIVOPTION[8];
+extern unsigned short PWM_PRD[6];
+extern unsigned int PWM_DIV[6];
 
 
 
@@ -9207,6 +9218,8 @@ _Pragma("diag_pop")
 unsigned long definePRD(float T);
 unsigned int defineQuotient(float T);
 void readEncoder(void);
+void definePWM_DIVSandPRD(float PWMfreq,short PWMchannel);
+void defineDeadBand(float deadtime,short PWMchannel);
 
 
 
@@ -9234,6 +9247,7 @@ __interrupt void BUTTON1INT();
 __interrupt void BUTTON2INT();
 __interrupt void ENCODERINT();
 __interrupt void ADCINT();
+void PWM_setDuty();
 
 
 
@@ -9243,14 +9257,13 @@ __interrupt void ADCINT();
  
 
 
-void updateState(TMS_state state);
 void setLED(short index,short state);
-void setPWMduty(short index, float freq);
+void setPWMfreq(short index, float freq);
 void setTimerFreq(short index, float freq);
+void setDeadTime(short index, float deadtime);
 
 
      
-
      
 
 
@@ -9267,4 +9280,10 @@ void setTimerFreq(short index, float freq);
     unsigned long int RX_counter = 0;              
     unsigned char RX_char;                         
      
-    extern short encoder_bin[4] = {0,0,0,0};
+    short encoder_bin[4] = {0,0,0,0};
+     
+    unsigned int PWM_CLKDIVOPTION[8] = {1,2,4,8,16,32,64,128};
+    unsigned int PWM_HSPCLKDIVOPTION[8] = {1,2,4,6,8,10,12,14};
+    unsigned short PWM_PRD[6] = {65535,65535,65535,65535,65535,65535};
+    unsigned int PWM_DIV[6] = {2,2,2,2,2,2};
+

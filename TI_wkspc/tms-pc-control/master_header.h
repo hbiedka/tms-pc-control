@@ -25,11 +25,12 @@
     #define TMS_CLOCKPERIOD 0.0000000066666666666666666667f   //TMS320F28335 clock period in seconds
     #define TIMER_THRESHOLD 4294967295U                       //timer capacity
     #define TIMER_INVTHRESHOLD 2.3283064e-10L                 //inverse of timer capacity
-    #define TIMER_MINPRD 150000                               //1 kHz max
+    #define TIMER_MINPRD 15000                                //10 kHz max
     #define TIMER_INTERRUPTDELAY 26                           //delay between start of interrupt and TIM update
     #define ADC_CAPACITY 4095                                 //ADC 12 bit
     #define ADC_INVCAPACITY 0.0002442002442L                  //inversion of the above
-
+    #define PWM_TBPRDMAX 65535                                //PWM max counter value
+    #define PWM_HALFSYSCLK 75E+6                              //half of SYSCLK for PWM divisor defining
     /* REGISTER MACROS */
     #define ADC_STARTCONV AdcRegs.ADCTRL2.bit.SOC_SEQ1 = 1   //begin conversion cycle on SEQ1
     #define ADC_RESETSEQ1 AdcRegs.ADCTRL2.bit.RST_SEQ1 = 1   //reset sequencer 1
