@@ -40,7 +40,7 @@ extern unsigned int TIMER_multiplier[3];
 extern unsigned long TIMER_PRD[3];
  
 extern unsigned long int RX_counter;
-extern unsigned char RX_char;
+extern unsigned char RX_frame[20];
  
 extern short encoder_bin[4];
  
@@ -73,7 +73,7 @@ extern unsigned int TIMER_multiplier[3];
 extern unsigned long TIMER_PRD[3];
  
 extern unsigned long int RX_counter;
-extern unsigned char RX_char;
+extern unsigned char RX_frame[20];
  
 extern short encoder_bin[4];
  
@@ -9374,16 +9374,48 @@ _Pragma("CHECK_MISRA(\"-20.1\")")
 _Pragma("diag_pop")
 
 
+
+void sendTMSstate(void) {
+
+    SciaRegs.SCITXBUF=100;
+    while(!SciaRegs . SCICTL2 . bit . TXRDY);
+
+    
+    short io_data = state.enc_gpio & 0x0F;
+    if (state.pb_gpio[0]) io_data |= 0x10;
+    if (state.pb_gpio[1]) io_data |= 0x20;
+    SciaRegs.SCITXBUF=io_data;
+    while(!SciaRegs . SCICTL2 . bit . TXRDY);
+
+    
+    short vr1 = state.vr_adc[0]*255;
+    short vr2 = state.vr_adc[1]*255;
+
+    SciaRegs.SCITXBUF=vr1;
+    while(!SciaRegs . SCICTL2 . bit . TXRDY);
+    SciaRegs.SCITXBUF=vr2;
+    while(!SciaRegs . SCICTL2 . bit . TXRDY);
+
+    
+    SciaRegs.SCITXBUF=13;
+    while(!SciaRegs . SCICTL2 . bit . TXRDY);
+    SciaRegs.SCITXBUF=10;
+    while(!SciaRegs . SCICTL2 . bit . TXRDY);
+}
+
+
 void main(void)
 {
-    initMCU();
+     initMCU();
 
     while(1){
-        DSP28x_usDelay(((((long double) 500000 * 1000.0L) / (long double)6.667L) - 9.0L) / 5.0L);
-        SciaRegs.SCITXBUF=97+state.enc_gpio;
+        DSP28x_usDelay(((((long double) 1000000 * 1000.0L) / (long double)6.667L) - 9.0L) / 5.0L);
+
         __asm(" NOP");
         state.pwm_duty[4] = state.vr_adc[0];
         state.pwm_duty[5] = state.vr_adc[1];
         PWM_setDuty();
+
+        sendTMSstate();
     }
 }

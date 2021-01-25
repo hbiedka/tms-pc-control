@@ -16,7 +16,7 @@ extern unsigned int TIMER_multiplier[3];
 extern unsigned long TIMER_PRD[3];
 /* UART */
 extern unsigned long int RX_counter;
-extern unsigned char RX_char;
+extern unsigned char RX_frame[20];
 /* GPIO */
 extern short encoder_bin[4];
 /* PWMs */

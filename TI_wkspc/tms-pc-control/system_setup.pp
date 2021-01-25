@@ -47,7 +47,7 @@ extern unsigned int TIMER_multiplier[3];
 extern unsigned long TIMER_PRD[3];
  
 extern unsigned long int RX_counter;
-extern unsigned char RX_char;
+extern unsigned char RX_frame[20];
  
 extern short encoder_bin[4];
  
@@ -80,7 +80,7 @@ extern unsigned int TIMER_multiplier[3];
 extern unsigned long TIMER_PRD[3];
  
 extern unsigned long int RX_counter;
-extern unsigned char RX_char;
+extern unsigned char RX_frame[20];
  
 extern short encoder_bin[4];
  
@@ -9335,9 +9335,12 @@ void setupUART(){
     SciaRegs.SCICTL1.bit.SWRESET=0; 
     SciaRegs.SCIFFRX.bit.RXFIFORESET=0;
 
-    SysCtrlRegs.LOSPCP.bit.LSPCLK=0; 
+
+
+
+    
     SciaRegs.SCIHBAUD=0x01; 
-    SciaRegs.SCILBAUD=0x45;
+    SciaRegs.SCILBAUD=0xE7;
 
     SciaRegs.SCICCR.bit.STOPBITS=0;
     SciaRegs.SCICCR.bit.PARITY=0;

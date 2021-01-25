@@ -21,8 +21,15 @@ void PWM_setDuty(){
 
 __interrupt void SCI_RX(){
 
-    RX_counter++;
-    RX_char=SciaRegs.SCIRXBUF.bit.RXDT; //read received character
+    RX_frame[RX_counter]=SciaRegs.SCIRXBUF.bit.RXDT; //read received character
+
+    if (RX_frame[RX_counter-1] == 13 && RX_frame[RX_counter] == 10) {
+        RX_counter = 0;
+    } else {
+        RX_counter++;
+    }
+
+    if (RX_counter >= 20) RX_counter = 0;
 
     PieCtrlRegs.PIEACK.all = (PIEACK_GROUP8 & PIEACK_GROUP9); //PIE ack.
 }

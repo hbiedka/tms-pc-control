@@ -18,7 +18,7 @@
     unsigned long TIMER_PRD[3] = {150000000,150000000,150000000};          //timers counter non-full PRDs
     /* UART */
     unsigned long int RX_counter = 0;              //UART counter
-    unsigned char RX_char;                         //UART RX
+    unsigned char RX_frame[20];                         //UART RX frame
     /* GPIO */
     short encoder_bin[4] = {0,0,0,0};
     /* PWMs */

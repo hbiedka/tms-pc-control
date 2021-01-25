@@ -75,9 +75,12 @@ void setupUART(){
     SciaRegs.SCICTL1.bit.SWRESET=0; //enable SCI reset mode
     SciaRegs.SCIFFRX.bit.RXFIFORESET=0;
 
-    SysCtrlRegs.LOSPCP.bit.LSPCLK=0; //sysclk/1
-    SciaRegs.SCIHBAUD=0x01; //57600 baud
-    SciaRegs.SCILBAUD=0x45;
+//    SysCtrlRegs.LOSPCP.bit.LSPCLK=0; //sysclk/1
+//    SciaRegs.SCIHBAUD=0x01; //57600 baud
+//    SciaRegs.SCILBAUD=0x45;
+    SysCtrlRegs.LOSPCP.bit.LSPCLK=2; //sysclk/4
+    SciaRegs.SCIHBAUD=0x01; //9600 baud
+    SciaRegs.SCILBAUD=0xE7;
 
     SciaRegs.SCICCR.bit.STOPBITS=0;
     SciaRegs.SCICCR.bit.PARITY=0;

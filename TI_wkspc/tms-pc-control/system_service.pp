@@ -47,7 +47,7 @@ extern unsigned int TIMER_multiplier[3];
 extern unsigned long TIMER_PRD[3];
  
 extern unsigned long int RX_counter;
-extern unsigned char RX_char;
+extern unsigned char RX_frame[20];
  
 extern short encoder_bin[4];
  
@@ -80,7 +80,7 @@ extern unsigned int TIMER_multiplier[3];
 extern unsigned long TIMER_PRD[3];
  
 extern unsigned long int RX_counter;
-extern unsigned char RX_char;
+extern unsigned char RX_frame[20];
  
 extern short encoder_bin[4];
  
@@ -9281,9 +9281,15 @@ void PWM_setDuty(){
 
 __interrupt void SCI_RX(){
 
-    RX_counter++;
-    PieCtrlRegs.PIEACK.all = (0x0080 & 0x0100);
-    RX_char=SciaRegs.SCIRXBUF.bit.RXDT; 
+    RX_frame[RX_counter]=SciaRegs.SCIRXBUF.bit.RXDT; 
+
+    if (RX_frame[RX_counter-1] == 13 && RX_frame[RX_counter] == 10) {
+        RX_counter = 0;
+    } else {
+        RX_counter++;
+    }
+
+    if (RX_counter >= 20) RX_counter = 0;
 
     PieCtrlRegs.PIEACK.all = (0x0080 & 0x0100); 
 }
