@@ -9253,6 +9253,7 @@ void PWM_setDuty();
 
 
 void sendTMSstate(void);
+void parseUARTframe(void);
 
 void setLED(short index,short state);
 void setPWMfreq(short index, float freq);
@@ -9390,10 +9391,5 @@ void main(void)
         state.pwm_duty[5] = state.vr_adc[1];
         PWM_setDuty();
 
-
-
-
-
-        
     }
 }

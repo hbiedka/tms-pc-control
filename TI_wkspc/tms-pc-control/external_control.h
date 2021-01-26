@@ -9,6 +9,7 @@
 #define EXTERNAL_CONTROL_H_
 
 void sendTMSstate(void);
+void parseUARTframe(void);
 
 void setLED(short index,short state);
 void setPWMfreq(short index, float freq);

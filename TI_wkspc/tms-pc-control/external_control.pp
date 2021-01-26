@@ -9260,6 +9260,7 @@ void PWM_setDuty();
 
 
 void sendTMSstate(void);
+void parseUARTframe(void);
 
 void setLED(short index,short state);
 void setPWMfreq(short index, float freq);
@@ -9302,6 +9303,32 @@ void sendTMSstate(void) {
     ScibRegs.SCITXBUF=10;
     while(!ScibRegs . SCICTL2 . bit . TXRDY);
 }
+
+
+void parseUARTframe(void) {
+    if (RX_frame[0] == 100) {
+        switch(RX_frame[1]) {
+            case 0:
+                
+                if (RX_frame[2]) {
+                    setLED(3,1);
+                } else {
+                    setLED(3,0);
+                }
+                break;
+            case 1:
+                
+                if (RX_frame[2]) {
+                    setLED(4,1);
+                } else {
+                    setLED(4,0);
+                }
+                break;
+
+        }
+    }
+}
+
 
 void setLED(short index,short value){
     if (index==3){

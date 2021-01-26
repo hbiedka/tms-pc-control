@@ -9260,6 +9260,7 @@ void PWM_setDuty();
 
 
 void sendTMSstate(void);
+void parseUARTframe(void);
 
 void setLED(short index,short state);
 void setPWMfreq(short index, float freq);
@@ -9289,6 +9290,7 @@ __interrupt void SCI_RX(){
 
     if (RX_frame[RX_counter-1] == 13 && RX_frame[RX_counter] == 10) {
         RX_counter = 0;
+        parseUARTframe();
     } else {
         RX_counter++;
     }

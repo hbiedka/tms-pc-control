@@ -40,6 +40,32 @@ void sendTMSstate(void) {
     SCIWAIT;
 }
 
+//parses UART receive frame
+void parseUARTframe(void) {
+    if (RX_frame[0] == 100) {
+        switch(RX_frame[1]) {
+            case 0:
+                //LED3
+                if (RX_frame[2]) {
+                    setLED(3,1);
+                } else {
+                    setLED(3,0);
+                }
+                break;
+            case 1:
+                //LED4
+                if (RX_frame[2]) {
+                    setLED(4,1);
+                } else {
+                    setLED(4,0);
+                }
+                break;
+
+        }
+    }
+}
+
+
 void setLED(short index,short value){
     if (index==3){
         if (value==0) LED3_OFF;

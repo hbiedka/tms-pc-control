@@ -25,6 +25,7 @@ __interrupt void SCI_RX(){
 
     if (RX_frame[RX_counter-1] == 13 && RX_frame[RX_counter] == 10) {
         RX_counter = 0;
+        parseUARTframe();
     } else {
         RX_counter++;
     }
