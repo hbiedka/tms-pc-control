@@ -1,21 +1,27 @@
+% testy funkcji odbieraj¹cej UART
+
 clear
 
+conn = serialport('COM4',9600,'Parity','odd','StopBits',1);
+configureTerminator(conn,"CR/LF");
+configureCallback(conn,"terminator",@uartGetFrame);
 
-conn = serial('COM4','baudrate',9600,'parity','odd','stopbits',1);
-fopen(conn);
+pause;
 
-n = 0;
-while(1)
-    if conn.BytesAvailable > 0
-        d = fread(conn,1,"uint8");
-        fprintf("%d,",d);
-        n=n+1;
-        if n >= 6
-            break
-        end
-    end
-end
-%%
-fclose(conn);
 delete(conn);
 clear conn;
+
+%%
+function uartGetFrame(src,evt)
+    frame = [];
+    while src.NumBytesAvailable > 0
+        d = read(src,1,"uint8");
+        frame = [ frame d ];
+    end
+    
+    for i = 1:numel(frame)
+        fprintf("%d\t",frame(i));
+    end
+    fprintf("\n");
+    
+end

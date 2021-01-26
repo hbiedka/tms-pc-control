@@ -9320,44 +9320,44 @@ void setupUART(){
     asm(" EALLOW");
 
     
-    GpioCtrlRegs.GPAMUX2.bit.GPIO28=1;
-    GpioCtrlRegs.GPAPUD.bit.GPIO28=0;
-    GpioCtrlRegs.GPADIR.bit.GPIO28=0;
+    GpioCtrlRegs.GPAMUX1.bit.GPIO11=2;
+    GpioCtrlRegs.GPAPUD.bit.GPIO11=0;
+    GpioCtrlRegs.GPADIR.bit.GPIO11=0;
 
     
-    GpioCtrlRegs.GPAMUX2.bit.GPIO29=1;
-    GpioCtrlRegs.GPAPUD.bit.GPIO29=1;
-    GpioCtrlRegs.GPADIR.bit.GPIO29=1;
+    GpioCtrlRegs.GPAMUX1.bit.GPIO9=2;
+    GpioCtrlRegs.GPAPUD.bit.GPIO9=1;
+    GpioCtrlRegs.GPADIR.bit.GPIO9=1;
 
-    SysCtrlRegs.PCLKCR0.bit.SCIAENCLK = 1;
+    SysCtrlRegs.PCLKCR0.bit.SCIBENCLK = 1;
 
-    SciaRegs.SCIFFTX.bit.SCIRST=0;
-    SciaRegs.SCICTL1.bit.SWRESET=0; 
-    SciaRegs.SCIFFRX.bit.RXFIFORESET=0;
+    ScibRegs.SCIFFTX.bit.SCIRST=0;
+    ScibRegs.SCICTL1.bit.SWRESET=0; 
+    ScibRegs.SCIFFRX.bit.RXFIFORESET=0;
 
 
 
 
     SysCtrlRegs.LOSPCP.bit.LSPCLK=2; 
-    SciaRegs.SCIHBAUD=0x01; 
-    SciaRegs.SCILBAUD=0xE7;
+    ScibRegs.SCIHBAUD=0x01; 
+    ScibRegs.SCILBAUD=0xE7;
 
-    SciaRegs.SCICCR.bit.STOPBITS=0;
-    SciaRegs.SCICCR.bit.PARITY=0;
-    SciaRegs.SCICCR.bit.PARITYENA=1; 
-    SciaRegs.SCICCR.bit.LOOPBKENA=0;
-    SciaRegs.SCICCR.bit.ADDRIDLE_MODE=0;
-    SciaRegs.SCICCR.bit.SCICHAR=7;
+    ScibRegs.SCICCR.bit.STOPBITS=0;
+    ScibRegs.SCICCR.bit.PARITY=0;
+    ScibRegs.SCICCR.bit.PARITYENA=1; 
+    ScibRegs.SCICCR.bit.LOOPBKENA=0;
+    ScibRegs.SCICCR.bit.ADDRIDLE_MODE=0;
+    ScibRegs.SCICCR.bit.SCICHAR=7;
 
-    SciaRegs.SCIFFTX.bit.SCIRST=1; 
-    SciaRegs.SCICTL1.bit.TXENA=1;  
+    ScibRegs.SCIFFTX.bit.SCIRST=1; 
+    ScibRegs.SCICTL1.bit.TXENA=1;  
 
-    SciaRegs.SCICTL1.bit.RXENA=1;
-    SciaRegs.SCIFFRX.bit.RXFIFORESET=1;
-    SciaRegs.SCIRXST.bit.RXRDY=1;
-    SciaRegs.SCICTL2.bit.RXBKINTENA=1;
+    ScibRegs.SCICTL1.bit.RXENA=1;
+    ScibRegs.SCIFFRX.bit.RXFIFORESET=1;
+    ScibRegs.SCIRXST.bit.RXRDY=1;
+    ScibRegs.SCICTL2.bit.RXBKINTENA=1;
 
-    SciaRegs.SCICTL1.bit.SWRESET=1; 
+    ScibRegs.SCICTL1.bit.SWRESET=1; 
     asm(" EDIS");
 }
 
@@ -9373,9 +9373,9 @@ void setupPWM(void){
     GpioCtrlRegs.GPAMUX1.bit.GPIO6 = 1;  
     GpioCtrlRegs.GPAMUX1.bit.GPIO7 = 1;  
     GpioCtrlRegs.GPAMUX1.bit.GPIO8 = 1;  
-    GpioCtrlRegs.GPAMUX1.bit.GPIO9 = 1;  
+    
     GpioCtrlRegs.GPAMUX1.bit.GPIO10 = 1; 
-    GpioCtrlRegs.GPAMUX1.bit.GPIO11 = 1; 
+    
 
     GpioCtrlRegs.GPADIR.bit.GPIO0 = 1;   
     GpioCtrlRegs.GPADIR.bit.GPIO1 = 1;   
@@ -9386,9 +9386,9 @@ void setupPWM(void){
     GpioCtrlRegs.GPADIR.bit.GPIO6 = 1;   
     GpioCtrlRegs.GPADIR.bit.GPIO7 = 1;   
     GpioCtrlRegs.GPADIR.bit.GPIO8 = 1;   
-    GpioCtrlRegs.GPADIR.bit.GPIO9 = 1;   
+    
     GpioCtrlRegs.GPADIR.bit.GPIO10 = 1;  
-    GpioCtrlRegs.GPADIR.bit.GPIO11 = 1;  
+    
 
 
      
@@ -9518,7 +9518,7 @@ void setupInterrupts(){
     InitPieVectTable();
     asm(" EALLOW");
      
-        PieVectTable.SCIRXINTA = &SCI_RX;  
+        PieVectTable.SCIRXINTB = &SCI_RX;  
         PieVectTable.TINT0 = &TIMER0INT;   
         PieVectTable.XINT13 = &TIMER1INT;  
         PieVectTable.TINT2 = &TIMER2INT;   
@@ -9529,9 +9529,7 @@ void setupInterrupts(){
      
         PieCtrlRegs.PIEIER1.bit.INTx7 = 1; 
         
-        
-        PieCtrlRegs.PIEIER9.bit.INTx1=1;   
-        
+        PieCtrlRegs.PIEIER9.bit.INTx3=1;   
         PieCtrlRegs.PIEIER1.bit.INTx4 = 1; 
         PieCtrlRegs.PIEIER12.bit.INTx1 = 1;
         PieCtrlRegs.PIEIER1.bit.INTx5 = 1; 
@@ -9557,13 +9555,13 @@ void setupGPIO(){
     GpioCtrlRegs.GPACTRL.bit.QUALPRD2 = 255;   
     GpioCtrlRegs.GPBCTRL.bit.QUALPRD2 = 255;   
      
-    GpioCtrlRegs.GPAMUX1.bit.GPIO9 = 0x00;
-    GpioCtrlRegs.GPADIR.bit.GPIO9 = 1;
-    GpioCtrlRegs.GPAPUD.bit.GPIO9 = 1;
+
+
+
      
-    GpioCtrlRegs.GPAMUX1.bit.GPIO11 = 0x00;
-    GpioCtrlRegs.GPADIR.bit.GPIO11 = 1;
-    GpioCtrlRegs.GPAPUD.bit.GPIO11 = 1;
+
+
+
      
     GpioCtrlRegs.GPBMUX1.bit.GPIO34 = 0x00;
     GpioCtrlRegs.GPBDIR.bit.GPIO34 = 1;

@@ -9274,29 +9274,29 @@ void setDeadTime(short index, float deadtime);
 void sendTMSstate(void) {
 
     
-    SciaRegs.SCITXBUF=100;
-    while(!SciaRegs . SCICTL2 . bit . TXRDY);
+    ScibRegs.SCITXBUF=100;
+    while(!ScibRegs . SCICTL2 . bit . TXRDY);
 
     
     short io_data = state.enc_gpio & 0x0F;
     if (state.pb_gpio[0]) io_data |= 0x10;
     if (state.pb_gpio[1]) io_data |= 0x20;
-    SciaRegs.SCITXBUF=io_data;
-    while(!SciaRegs . SCICTL2 . bit . TXRDY);
+    ScibRegs.SCITXBUF=io_data;
+    while(!ScibRegs . SCICTL2 . bit . TXRDY);
 
     
     short vr1 = state.vr_adc[0]*255;
     short vr2 = state.vr_adc[1]*255;
-    SciaRegs.SCITXBUF=vr1;
-    while(!SciaRegs . SCICTL2 . bit . TXRDY);
-    SciaRegs.SCITXBUF=vr2;
-    while(!SciaRegs . SCICTL2 . bit . TXRDY);
+    ScibRegs.SCITXBUF=vr1;
+    while(!ScibRegs . SCICTL2 . bit . TXRDY);
+    ScibRegs.SCITXBUF=vr2;
+    while(!ScibRegs . SCICTL2 . bit . TXRDY);
 
     
-    SciaRegs.SCITXBUF=13;
-    while(!SciaRegs . SCICTL2 . bit . TXRDY);
-    SciaRegs.SCITXBUF=10;
-    while(!SciaRegs . SCICTL2 . bit . TXRDY);
+    ScibRegs.SCITXBUF=13;
+    while(!ScibRegs . SCICTL2 . bit . TXRDY);
+    ScibRegs.SCITXBUF=10;
+    while(!ScibRegs . SCICTL2 . bit . TXRDY);
 }
 
 void setLED(short index,short value){

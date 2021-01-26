@@ -9,34 +9,34 @@
 #include "master_header.h"
 
 //flush buffer
-#define SCIWAIT while(!SciaRegs.SCICTL2.bit.TXRDY)
+#define SCIWAIT while(!ScibRegs.SCICTL2.bit.TXRDY)
 
 //sends current global data by UART to PC
 void sendTMSstate(void) {
 
     //overture
-    SciaRegs.SCITXBUF=100;
+    ScibRegs.SCITXBUF=100;
     SCIWAIT;
 
     //GPIO byte - bits 7..6 set to 0, 5 - PB2, 4 - PB1, 3..0 - hex encoder
     short io_data = state.enc_gpio & 0x0F;
     if (state.pb_gpio[0]) io_data |= 0x10;
     if (state.pb_gpio[1]) io_data |= 0x20;
-    SciaRegs.SCITXBUF=io_data;
+    ScibRegs.SCITXBUF=io_data;
     SCIWAIT;
 
     //ADC
     short vr1 = state.vr_adc[0]*255;
     short vr2 = state.vr_adc[1]*255;
-    SciaRegs.SCITXBUF=vr1;
+    ScibRegs.SCITXBUF=vr1;
     SCIWAIT;
-    SciaRegs.SCITXBUF=vr2;
+    ScibRegs.SCITXBUF=vr2;
     SCIWAIT;
 
     //CRLF for frame closing
-    SciaRegs.SCITXBUF=13;
+    ScibRegs.SCITXBUF=13;
     SCIWAIT;
-    SciaRegs.SCITXBUF=10;
+    ScibRegs.SCITXBUF=10;
     SCIWAIT;
 }
 

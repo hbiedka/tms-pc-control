@@ -21,7 +21,7 @@ void PWM_setDuty(){
 
 __interrupt void SCI_RX(){
 
-    RX_frame[RX_counter]=SciaRegs.SCIRXBUF.bit.RXDT; //read received character
+    RX_frame[RX_counter]=ScibRegs.SCIRXBUF.bit.RXDT; //read received character
 
     if (RX_frame[RX_counter-1] == 13 && RX_frame[RX_counter] == 10) {
         RX_counter = 0;
