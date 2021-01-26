@@ -39,6 +39,7 @@ extern unsigned int TIMER_multiplierTmp[3];
 extern unsigned int TIMER_multiplier[3];
 extern unsigned long TIMER_PRD[3];
  
+extern unsigned long int RX_callback_counter;
 extern unsigned long int RX_counter;
 extern unsigned char RX_frame[20];
  
@@ -72,6 +73,7 @@ extern unsigned int TIMER_multiplierTmp[3];
 extern unsigned int TIMER_multiplier[3];
 extern unsigned long TIMER_PRD[3];
  
+extern unsigned long int RX_callback_counter;
 extern unsigned long int RX_counter;
 extern unsigned char RX_frame[20];
  
@@ -9250,6 +9252,8 @@ void PWM_setDuty();
  
 
 
+void sendTMSstate(void);
+
 void setLED(short index,short state);
 void setPWMfreq(short index, float freq);
 void setTimerFreq(short index, float freq);
@@ -9390,6 +9394,6 @@ void main(void)
 
 
 
-        sendTMSstate();
+        
     }
 }

@@ -17,6 +17,7 @@
     unsigned int TIMER_multiplierTmp[3] = {0,0,0}; //timers temporary counter multipliers
     unsigned long TIMER_PRD[3] = {150000000,150000000,150000000};          //timers counter non-full PRDs
     /* UART */
+    unsigned long int RX_callback_counter = 0;     //Timer0 counter for UART send callback
     unsigned long int RX_counter = 0;              //UART counter
     unsigned char RX_frame[20];                         //UART RX frame
     /* GPIO */

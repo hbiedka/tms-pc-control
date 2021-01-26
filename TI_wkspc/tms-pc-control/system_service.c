@@ -71,9 +71,20 @@ __interrupt void TIMER0INT(){
         CpuTimer0Regs.PRD.all = TIMER_PRD[0]-TIMER_INTERRUPTDELAY;
         CpuTimer0Regs.TCR.bit.TRB = 1;
         TIMER_multiplierTmp[0] = TIMER_multiplier[0];
-        /* CODE GOES HERE */
+
         ++TIMER_counter[0];
+
+        //get data from ADC
         ADC_STARTCONV;
+
+        //UART state send callback
+        RX_callback_counter++;
+        if (RX_callback_counter >= 10000) {
+            RX_callback_counter = 0;
+            //callback here
+            sendTMSstate();
+        }
+
         }
         else{
             CpuTimer0Regs.PRD.all = TIMER_THRESHOLD-TIMER_INTERRUPTDELAY;

@@ -46,6 +46,7 @@ extern unsigned int TIMER_multiplierTmp[3];
 extern unsigned int TIMER_multiplier[3];
 extern unsigned long TIMER_PRD[3];
  
+extern unsigned long int RX_callback_counter;
 extern unsigned long int RX_counter;
 extern unsigned char RX_frame[20];
  
@@ -79,6 +80,7 @@ extern unsigned int TIMER_multiplierTmp[3];
 extern unsigned int TIMER_multiplier[3];
 extern unsigned long TIMER_PRD[3];
  
+extern unsigned long int RX_callback_counter;
 extern unsigned long int RX_counter;
 extern unsigned char RX_frame[20];
  
@@ -9257,6 +9259,8 @@ void PWM_setDuty();
  
 
 
+void sendTMSstate(void);
+
 void setLED(short index,short state);
 void setPWMfreq(short index, float freq);
 void setTimerFreq(short index, float freq);
@@ -9331,9 +9335,20 @@ __interrupt void TIMER0INT(){
         CpuTimer0Regs.PRD.all = TIMER_PRD[0]-26;
         CpuTimer0Regs.TCR.bit.TRB = 1;
         TIMER_multiplierTmp[0] = TIMER_multiplier[0];
-         
+
         ++TIMER_counter[0];
+
+        
         AdcRegs . ADCTRL2 . bit . SOC_SEQ1 = 1;
+
+        
+        RX_callback_counter++;
+        if (RX_callback_counter >= 10000) {
+            RX_callback_counter = 0;
+            
+            sendTMSstate();
+        }
+
         }
         else{
             CpuTimer0Regs.PRD.all = 4294967295U-26;

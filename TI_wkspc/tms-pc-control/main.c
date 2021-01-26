@@ -16,10 +16,5 @@ void main(void)
         state.pwm_duty[5] = state.vr_adc[1];
         PWM_setDuty();
 
-//        ScibRegs.SCITXBUF=0xFE;
-//        while(!ScibRegs.SCICTL2.bit.TXRDY);
-//        ScibRegs.SCITXBUF=0x55;
-
-        sendTMSstate();
     }
 }
