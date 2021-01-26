@@ -9264,6 +9264,7 @@ void parseUARTframe(void);
 
 void setLED(short index,short state);
 void setPWMfreq(short index, float freq);
+void setPWMduty(short index, float duty);
 void setTimerFreq(short index, float freq);
 void setDeadTime(short index, float deadtime);
 

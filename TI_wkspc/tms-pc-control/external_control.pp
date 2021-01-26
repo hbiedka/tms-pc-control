@@ -9264,6 +9264,7 @@ void parseUARTframe(void);
 
 void setLED(short index,short state);
 void setPWMfreq(short index, float freq);
+void setPWMduty(short index, float duty);
 void setTimerFreq(short index, float freq);
 void setDeadTime(short index, float deadtime);
 
@@ -9307,24 +9308,53 @@ void sendTMSstate(void) {
 
 void parseUARTframe(void) {
     if (RX_frame[0] == 100) {
-        switch(RX_frame[1]) {
+
+        
+        short int code = RX_frame[1] & 0xF0;
+        code = code >> 4;
+        short int device = RX_frame[1] & 0x0F;
+
+        switch(code) {
+        case 0:
+            switch(device) {
             case 0:
                 
-                if (RX_frame[2]) {
-                    setLED(3,1);
-                } else {
-                    setLED(3,0);
-                }
+                if (RX_frame[2]) setLED(3,1);
+                else setLED(3,0);
                 break;
             case 1:
                 
-                if (RX_frame[2]) {
-                    setLED(4,1);
-                } else {
-                    setLED(4,0);
-                }
+                if (RX_frame[2]) setLED(4,1);
+                else setLED(4,0);
                 break;
+            }
+            break;
 
+        case 1:
+            
+            if (device >= 0 && device < 6) {
+                unsigned int freq = RX_frame[2] << 8;
+                freq |= RX_frame[3];
+                setPWMfreq(device,(float)freq);
+            }
+            break;
+        case 2:
+            
+            if (device >= 0 && device < 6) {
+                short duty = RX_frame[2];
+                if (duty > 100) duty = 100;
+                setPWMduty(device,(float)duty/100);
+            }
+            break;
+
+        case 3:
+            
+            if (device >= 0 && device < 6) {
+                unsigned int dead = RX_frame[2] << 8;
+                dead |= RX_frame[3];
+                setDeadTime(device,(float)dead/1000);
+            }
+            break;
         }
     }
 }
@@ -9347,6 +9377,11 @@ void setPWMfreq(short index, float freq){
     definePWM_DIVSandPRD(freq,index);
     defineDeadBand(state.pwm_deadtime[index], index);
     state.pwm_freq[index] = (long double)PWM_PRD[index]/(75E+6*PWM_DIV[index]);
+}
+
+void setPWMduty(short index, float duty){
+    state.pwm_duty[index] = duty;
+    PWM_setDuty();
 }
 
 void setDeadTime(short index, float deadtime){
