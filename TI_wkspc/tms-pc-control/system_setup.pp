@@ -9338,7 +9338,7 @@ void setupUART(){
 
 
 
-    
+    SysCtrlRegs.LOSPCP.bit.LSPCLK=2; 
     SciaRegs.SCIHBAUD=0x01; 
     SciaRegs.SCILBAUD=0xE7;
 
