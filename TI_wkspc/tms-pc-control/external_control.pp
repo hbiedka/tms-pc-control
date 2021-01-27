@@ -9355,6 +9355,20 @@ void parseUARTframe(void) {
                 setDeadTime(device,(float)dead/1000);
             }
             break;
+        case 4:
+            
+            if (device >= 0 && device < 6) {
+                unsigned long int freq = 0;
+
+                
+                short i;
+                for (i=2; i<=5; i++) {
+                    freq = freq << 8;
+                    freq += RX_frame[i];
+                }
+
+                setTimerFreq(device,(float)freq/1000);
+            }
         }
     }
 }

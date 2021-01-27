@@ -33,7 +33,7 @@ configureTerminator(conn,"CR/LF");
 
 % Potstawowe elementy UI
 gui = figure("Name","TMS320 Peripherial UART Control");
-gui_title = uicontrol(gui,'Style','text','String','TMS320x2833 Peripherial Control','Position',[20 350 400 50],'HorizontalAlignment','left','FontSize',18,'FontWeight','bold');
+gui_title = uicontrol(gui,'Style','text','String','TMS320x2833 Peripherial UART Control','Position',[20 350 500 50],'HorizontalAlignment','left','FontSize',18,'FontWeight','bold');
 gui_credits = uicontrol(gui,'Style','text','String','By Bogdan Bednarski & Hubert Biedka Warsaw University of Technology, 2021','Position',[350 10 200 30],'HorizontalAlignment','right');
 
 % Enkoder, przyciski
@@ -142,20 +142,32 @@ function uartGetFrame(src,vr1,vr2,b1,b2,encoder)
 end
 
 function UartSend(src,reg,val,valbytes)
-    
-    if valbytes == 2
-        %rozk³ad na 2 bajty
-        val_hi = bitshift(bitand(val,0xFF00),-8);
-        val_lo = bitand(val,0x00FF);
-        val = [val_hi val_lo];
+
+    valdata = val; %backup
+    val = []; % zmiana na tablicê
+
+    for i = 1:valbytes
+        %pobierz najm³odszy bajt
+        vb = bitand(valdata,255);
+        valdata = bitshift(valdata,-8);
+        val = [ vb val ];
     end
-        
+    
     frame = [ 100 reg val 13 10];
     write(src,frame,"uint8");
 end
 
 function TimerUpdate(conn,i,freq)
-    disp(freq.String);
+    
+    freqData = str2double(freq.String);
+    freq_reg = floor(freqData*1000);
+    
+    if freq_reg > 0 && freq_reg <= 10000000
+        UartSend(conn,64+i,freq_reg,4);
+    else
+        %ostrze¿enie
+        errordlg("Invalid value. Frequency should be from 0.001 to 10000 [Hz]")
+    end
 end
 
 function PwmUpdate(conn,i,freq,duty,dead)
