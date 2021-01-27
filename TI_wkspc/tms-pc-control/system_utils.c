@@ -43,6 +43,7 @@ void definePWM_DIVSandPRD(float PWMfreq,short PWMchannel){
             float testDiv = PWM_CLKDIVOPTION[iclk]*PWM_HSPCLKDIVOPTION[ihsp];
             unsigned long int testTBPRD = (unsigned long int)(PWM_HALFSYSCLK*prd/testDiv);
             if (testTBPRD<=PWM_TBPRDMAX){
+                if (testTBPRD<=1) testTBPRD=1;
                 PWM_PRD[PWMchannel] = testTBPRD;
                 PWM_DIV[PWMchannel] = testDiv;
                 EALLOW;
