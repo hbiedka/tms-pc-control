@@ -9380,17 +9380,17 @@ _Pragma("CHECK_MISRA(\"-20.1\")")
 _Pragma("diag_pop")
 
 
+
 void main(void)
 {
      initMCU();
 
     while(1){
-        DSP28x_usDelay(((((long double) 1000000 * 1000.0L) / (long double)6.667L) - 9.0L) / 5.0L);
-
         __asm(" NOP");
-
-
-
+            DSP28x_usDelay(((((long double) 1000000 * 1000.0L) / (long double)6.667L) - 9.0L) / 5.0L);
+            state.pwm_duty[4] = state.vr_adc[0];
+            state.pwm_duty[5] = state.vr_adc[1];
+            PWM_setDuty();
 
     }
 }
