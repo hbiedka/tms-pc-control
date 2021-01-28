@@ -9346,7 +9346,9 @@ __interrupt void TIMER0INT(){
 
         
         RX_callback_counter++;
-        if (RX_callback_counter >= 10000) {
+
+        
+        if (RX_callback_counter >= 2500) {
             RX_callback_counter = 0;
             
             sendTMSstate();

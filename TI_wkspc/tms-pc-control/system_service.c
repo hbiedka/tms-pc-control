@@ -80,7 +80,9 @@ __interrupt void TIMER0INT(){
 
         //UART state send callback
         RX_callback_counter++;
-        if (RX_callback_counter >= 10000) {
+
+        // send UART frame in every 250ms
+        if (RX_callback_counter >= 2500) {
             RX_callback_counter = 0;
             //callback here
             sendTMSstate();
